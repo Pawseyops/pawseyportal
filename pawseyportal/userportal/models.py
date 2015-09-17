@@ -1,6 +1,6 @@
 from django.db import models
 
-# Create your models here.
+# Models for Projects, people, accounts.
 class ServiceType(models.Model):
     name = models.CharField(max_length=32)
     helpEmail = models.EmailField(max_length=254)
@@ -31,8 +31,23 @@ class PersonAccount(models.Model):
     def __unicode(self):
         return self.uid   #TODO: relate this back to the Person to get name.
 
+class PersonStatus(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.CharField(max_length=256, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s" % self.name
 
 class Person(models.Model):
+    STATUS = {
+        'NEW': 1,
+        'EMAIL_SENT': 2,
+        'DETAILS_FILLED': 3,
+        'ACCOUNT_CREATED': 4,
+        'ACCOUNT_CREATED_EMAIL_SENT': 5,
+        'SUSPENDED': 6,
+    }
+
     firstName = models.CharField(max_length=32)
     surname = models.CharField(max_length=32)
     institution = models.ForeignKey(Institution)
@@ -40,8 +55,12 @@ class Person(models.Model):
     preferredEmail = models.EmailField(max_length=64)
     phone = models.CharField(max_length=32)
     student = models.BooleanField(default = False)
-    suspend = models.BooleanField(default = False)
     personAccount = models.ForeignKey('PersonAccount', null=True, related_name='person')    
+    accountEmailHash = models.CharField(max_length=50, null=True, blank=True)
+    status = models.ForeignKey(PersonStatus, default=STATUS['NEW'])
+    accountEmailOn = models.DateTimeField(null=True, blank=True)
+    accountCreatedOn = models.DateTimeField(null=True, blank=True)
+    accountCreatedEmailOn = models.DateTimeField(null=True, blank=True)
 
     def displayName(self):
         return self.firstName + ' ' + self.surname
@@ -107,3 +126,10 @@ class AllocationFilesystem(models.Model):
     def __unicode__(self):
         return self.filesystem.name
 
+class EmailTemplate(models.Model):
+    name = models.CharField(max_length=100, help_text=help_text_emailtemplate_name)
+    subject = models.CharField(max_length=100, help_text=help_text_emailtemplate_subject)
+    template = models.CharField(max_length=8192, blank=True, help_text=help_text_emailtemplate_template)
+
+    def __unicode__(self):
+        return self.name
