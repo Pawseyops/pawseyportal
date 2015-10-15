@@ -16,34 +16,34 @@ from django.template import loader, Context
 from models import EmailTemplate
 
 
-def send_account_creation_mail(participant, request):
-    subject = "Successful application for Pawsey funded iVEC infrastructure"
+def send_account_creation_mail(person, request):
+    subject = "Successful application for Pawsey Supercomputing Centre infrastructure"
     email_hash = str(uuid.uuid4())
     link = "%s%s/%s" % (settings.MYURL, 'account-request', email_hash)
     template = EmailTemplate.objects.get(name='Participant Account Request')
-    subject, message = template.render_to_string({'participant': participant, 'link': link})
-    send_mail(subject, message, participant.email)
+    subject, message = template.render_to_string({'participant': person, 'link': link})
+    send_mail(subject, message, person.institutionEmail)
 
-    participant.account_email_hash = email_hash
-    participant.status_id = Participant.STATUS['EMAIL_SENT']
-    participant.account_email_on = datetime.datetime.now()
-    participant.save()
+    person.account_email_hash = email_hash
+    person.status = Participant.STATUS['EMAIL_SENT']
+    person.accountEmailOn = datetime.datetime.now()
+    person.save()
 
-def send_account_created_notification_mail(participant, request):
-    subject = "Account created for Pawsey funded iVEC infrastructure"
-    uid = participant.participantaccount.uid
+def send_account_created_notification_mail(person, request):
+    subject = "Account created for Pawsey Supercomputing Centre infrastructure"
+    uid = person.personAccount.uid
     account_details = get_user_account_details(uid)
-    project = participant.application.ldap_project_name 
-    hours_allocated = participant.application.hours_allocated
+    project = person.allocation.project.code
+    hours_allocated = person.allocation.serviceunits
     assert project is not None and len(project)>0, "Project could not be retrieved at time of 'account created' email for user %s" % (uid) 
     assert (hours_allocated is not None) and (hours_allocated > 0), "Invalid hours allocated (%s) at time of 'account created' email" % (str(hours_allocated) )
     template = EmailTemplate.objects.get(name='Participant Account Created')
-    subject, message = template.render_to_string({'participant': participant, 'project': project, 'uid': uid})
-    send_mail(subject, message, participant.email)
+    subject, message = template.render_to_string({'participant': person, 'project': project, 'uid': uid})
+    send_mail(subject, message, person.insitutionEmail)
 
-    participant.status_id = Participant.STATUS['ACCOUNT_CREATED_EMAIL_SENT']
-    participant.account_created_email_on = datetime.datetime.now()
-    participant.save()
+    person.status = Participant.STATUS['ACCOUNT_CREATED_EMAIL_SENT']
+    person.accountCreatedEmailOn = datetime.datetime.now()
+    person.save()
 
 def send_mail(subject, message, to):   
     django_mail.send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [to])
@@ -103,7 +103,7 @@ def create_applications_groups(applicationidlist):
     ldaph.close()
     return result    
 
-def create_user_accounts(participant_id_list):
+def create_user_accounts(person_id_list):
     '''
     Create the account in LDAP and add it to the group
     if the user account doesn't exist, create it else update it.
@@ -124,64 +124,64 @@ def create_user_accounts(participant_id_list):
     basedn = settings.USER_LDAP_DOMAIN
 
     if ldaph:
-        for id in participant_id_list:
-            participant = Participant.objects.get(id=id)
-            logger.debug("\nParticipant: %s" % (participant.email,) )
+        for id in person_id_list:
+            person = Person.objects.get(id=id)
+            logger.debug("\nParticipant: %s" % (person.institutionEmail,) )
 
-            if participant.status_id != Participant.STATUS['DETAILS_FILLED']:   # account not ready yet
+            if person.status != Person.STATUS['DETAILS_FILLED']:   # account not ready yet
                 result['errors'] += 1
-                logger.debug("Skipping participant %s, details not filled" % (participant.email) )
-                continue # next participant
+                logger.debug("Skipping participant %s, details not filled" % (person.institutionEmail) )
+                continue # next person
 
             try:
-                participant_account = participant.participantaccount
-                email = participant.email
+                person_account = person.personAccount
+                email = person.institutionEmail
 
-                if not participant_account:
-                    raise ParticipantAccount.DoesNotExist()
+                if not person_account:
+                    raise PersonAccount.DoesNotExist()
 
-                if participant_account:
-                    logger.debug("participant: %s %s email:%s" % (participant_account.first_name, participant_account.last_name, email) )
+                if person_account:
+                    logger.debug("participant: %s %s email:%s" % (person_account.first_name, person_account.last_name, email) )
                     # get the user entry in the new ldap repo if it exists
 
                     #userdetails = ldaph.get_user_details_from_attribute(attribute = 'mail', value = email)
-                    userdetails = ldaph.get_user_details_from_attribute(attribute = 'uid', value = participant_account.uid)
-                    logger.debug("user uid: %s details: %s" % (participant_account.uid, userdetails) )
+                    userdetails = ldaph.get_user_details_from_attribute(attribute = 'uid', value = person_account.uid)
+                    logger.debug("user uid: %s details: %s" % (person_account.uid, userdetails) )
                     done = False
 
                     if not userdetails:
                         # user entry does not exist in the new ldap, create it
                         logger.debug("creating user %s in LDAP"%(email))
-                        userdone = create_user_account(ldaph, participant, usercontainer, userdn, basedn)
+                        userdone = create_user_account(ldaph, person, usercontainer, userdn, basedn)
                         if userdone:
                             result['created'] += 1
                     else:
                         logger.debug("updating user %s in LDAP"%(email))
-                        userdone = update_user_account(ldaph, participant)
+                        userdone = update_user_account(ldaph, person)
                         if userdone:
                             result['updated'] += 1
 
                     if userdone:
                         # user added or updated to the ldap directory, add the user to the group, create the group if it doesn't exist
-                        (parentarea, childarea, areanum) = get_application_area(participant.application)
+                        (parentarea, childarea, areanum) = get_application_area(person.allocation)
 
-                        if participant.application.ldap_project_name is not None and participant.application.ldap_project_name != '':
-                            groupname = participant.application.ldap_project_name
+                        if person.application.ldap_project_name is not None and person.application.ldap_project_name != '':
+                            groupname = person.application.ldap_project_name
                         else:
                             groupname = '%s%s' % (childarea, areanum)
-                        gidnumber = str(30010 + participant.application.id)
-                        description = str(participant.application.project_title)
+                        gidnumber = str(30010 + person.application.id)
+                        description = str(person.application.project_title)
                         groupdone = create_group(ldaphandler = ldaph, parentou = parentarea, groupname = groupname, description = description, gidnumber = gidnumber)
                         
-                        uid = participant_account.uid
+                        uid = person_account.uid
                         logger.debug("Adding user uid: %s to group: %s"%(uid, groupname))
                         # ldap_add_user_to_group(username, groupname, objectclass='groupofuniquenames', membershipattr="uniqueMember"):
                         usergroupdone = ldaph.ldap_add_user_to_group(uid, groupname, objectclass='posixgroup', membershipattr='memberUid')
                         logger.debug("Adding user uid: %s to group: %s RESULT: %s"%(uid, groupname, usergroupdone))
 
                         # create a posixGroup with cn=uid
-                        posixgroupname = participant_account.uid
-                        gidnumber = str(participant_account.gid_number)
+                        posixgroupname = person_account.uid
+                        gidnumber = str(person_account.gid_number)
                         parentou = settings.USER_LDAP_POSIXGROUPBASE # 'ou=POSIX,ou=Groups,dc=ivec,dc=org'
                         
                         
@@ -190,17 +190,17 @@ def create_user_accounts(participant_id_list):
                         # update the user status only if all the steps went through
                         logger.debug( "groupdone %s usergroupdone %s posixdone %s" % (groupdone, usergroupdone, posixdone) )
                         if groupdone and usergroupdone and posixdone:
-                            participant.status_id = Participant.STATUS['ACCOUNT_CREATED']
-                            participant.account_created_on = datetime.datetime.now()
-                            participant.save()
+                            person.status = Participant.STATUS['ACCOUNT_CREATED']
+                            person.accountCreatedOn = datetime.datetime.now()
+                            person.save()
 
                         # save the groupname like 'Astronomy23' in the application
-                        application = participant.application
+                        application = person.application
                         application.ldap_project_name = groupname
                         application.save()
 
-            except ParticipantAccount.DoesNotExist, e:
-                logger.debug("ParticipantAccount.DoesNotExist error: %s" % (e) )
+            except PersonAccount.DoesNotExist, e:
+                logger.debug("PersonAccount.DoesNotExist error: %s" % (e) )
                 result['errors'] += 1
         ldaph.close()
     return result
@@ -227,27 +227,27 @@ def add_user_to_group(ldaphandler, uid, groupname):
     done = ldaph.ldap_add_user_to_group(uid, groupname)
     return done
 
-def set_user_ldap_dict(participant):
+def set_user_ldap_dict(person):
     '''set the user attributes from the old dictionary and add/'override the attributes we really need'''
     
     detailsdict = {}
-    participantaccount = participant.participantaccount
+    personaccount = person.personaccount
 
-    detailsdict["givenName"] = [participantaccount.first_name]
-    detailsdict["sn"] = [participantaccount.last_name]
-    detailsdict["cn"] = [participantaccount.first_name + ' ' + participantaccount.last_name] # required attribute
+    detailsdict["givenName"] = [person.first_name]
+    detailsdict["sn"] = [person.surname]
+    detailsdict["cn"] = [person.displayName] # required attribute
     #only want non blank telephone nums
-    if participantaccount.phone is not None and len(participantaccount.phone) > 0: 
-        detailsdict['telephoneNumber'] = [participantaccount.phone]
-    detailsdict['userPassword'] = [participantaccount.password_hash]
-    detailsdict['mail'] = [participant.email]
+    if person.phone is not None and len(person.phone) > 0: 
+        detailsdict['telephoneNumber'] = [person.phone]
+    detailsdict['userPassword'] = [personaccount.password_hash]
+    detailsdict['mail'] = [person.institutionEmail]
 
-    uid =  str(participantaccount.uid)
+    uid =  str(personaccount.uid)
     detailsdict['uid'] = [uid]
     
     #POSIX STUFF
-    detailsdict['uidNumber'] = [participantaccount.uid_number]
-    detailsdict['gidNumber'] = [participantaccount.gid_number]
+    detailsdict['uidNumber'] = [personaccount.uid_number]
+    detailsdict['gidNumber'] = [personaccount.gid_number]
     detailsdict['homeDirectory'] = ['/home/%s' % (uid)]
     detailsdict['loginShell'] = ['/bin/bash']
 
@@ -260,22 +260,22 @@ def set_user_ldap_dict(participant):
 
     return detailsdict
 
-def create_user_account(ldaph, participant, usercontainer, userdn, basedn):
+def create_user_account(ldaph, person, usercontainer, userdn, basedn):
     res = False
-    participant_account = participant.participantaccount
-    participant_account.constrain_uidgid()
-    uid = participant_account.uid
-    unique_uid = participant_account.get_unique_uid()
+    person_account = person.personAccount
+    person_account.constrain_uidgid()
+    uid = person_account.uid
+    unique_uid = person_account.get_unique_uid()
     if uid != unique_uid:
         logger.debug("Unwilling to submit non-unique uid (%s) for LDAP account creation - suggest %s" % (uid, unique_uid) )
     else: 
-        institution = participant_account.institution.ldap_ou_name
+        institution = person_account.institution.ldap_ou_name
         usercontainer = 'ou=%s,%s' % (institution,usercontainer)
         olddict = {}
        
-        detailsdict = set_user_ldap_dict(participant)
+        detailsdict = set_user_ldap_dict(person)
 
-        logger.debug( "create_user_account %s uid: %s userdn: %s basedn: %s" % (participant.email, uid, userdn, basedn) )
+        logger.debug( "create_user_account %s uid: %s userdn: %s basedn: %s" % (person.institutionEmail, uid, userdn, basedn) )
         # ldap_handler.add_user build the user dn like this:
         # dn = 'uid=%s,%s,%s,%s' % (username, usercontainer, userdn, basedn)
         # real example from ldap browser: uid=hum092,ou=CSIRO,ou=People,dc=ivec,dc=org
@@ -292,17 +292,17 @@ def create_user_account(ldaph, participant, usercontainer, userdn, basedn):
     logger.debug("create_user_account result: %s" % (res,) )
     return res
 
-def update_user_account(ldaph, participant):
-    participant_account = participant.participantaccount
-    uid = participant_account.uid
+def update_user_account(ldaph, person):
+    person_account = person.personaccount
+    uid = person_account.uid
 
-    detailsdict = set_user_ldap_dict(participant)
+    detailsdict = set_user_ldap_dict(person)
 
-    #print "update_user_account %s uid: %s" % (participant.email, uid)
+    #print "update_user_account %s uid: %s" % (person.email, uid)
 
     res = ldaph.ldap_update_user(username = uid,
                              newusername = uid,
-                             newpassword = str(participant_account.password_hash),
+                             newpassword = str(person_account.password_hash),
                              detailsDict = detailsdict,
                              pwencoding = None)
 
@@ -311,14 +311,14 @@ def update_user_account(ldaph, participant):
     res = True
     return res
 
-def get_user_accounts_CSV(participant_id_list):
+def get_user_accounts_CSV(person_id_list):
     returnlist = []
     #so the format we will do is:
     #username, emailaddress, homedir, shell, uidnum, gidnum, institution, groups (space separated)
     returnlist.append("#UID, EMAIL, HOMEDIR, SHELL, UIDNUM, GIDNUM, INSTITUTION, GROUPS")
-    for id in participant_id_list:
-        p = Participant.objects.get(id=id)
-        pa = p.participantaccount
+    for id in person_id_list:
+        p = Person.objects.get(id=id)
+        pa = p.personAccount
         try:
             detailsdict = get_user_account_details(pa.uid)
             ldap_details = detailsdict['details']
@@ -347,7 +347,7 @@ def get_user_account_details(uid):
     groups = ldaph.ldap_get_user_groups(uid, use_udn=False)
     ldaph.MEMBERATTR = 'memberUid'
     groups += ldaph.ldap_get_user_groups(uid, use_udn=False)
-    ldaph.GROUP_BASE = settings.EPIC_LDAP_POSIXGROUPBASE
+    ldaph.GROUP_BASE = settings.USER_LDAP_POSIXGROUPBASE
     groups += ldaph.ldap_get_user_groups(uid, use_udn=False)
 
 
@@ -374,13 +374,13 @@ def get_applications_CSV(id_list):
     return returnlist
 
 @transaction.commit_on_success
-def save_account_details(participant):
-    participant_account = participant.participantaccount
-    participant.status_id = Participant.STATUS['DETAILS_FILLED']
-    participant.details_filled_on = datetime.datetime.now()
+def save_account_details(person):
+    person_account = person.personAccount
+    person.status_id = Participant.STATUS['DETAILS_FILLED']
+    person.details_filled_on = datetime.datetime.now()
     #make sure the uid is valid
-    participant_account.uid = participant_account.get_unique_uid()
-    participant_account.save()
-    participant_account.constrain_uidgid() #'fixes' the uidnumber/gidnumber and saves
+    person_account.uid = person_account.get_unique_uid()
+    person_account.save()
+    person_account.constrain_uidgid() #'fixes' the uidnumber/gidnumber and saves
      
-    participant.save()
+    person.save()
