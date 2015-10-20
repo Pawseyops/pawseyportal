@@ -1,0 +1,50 @@
+[
+    {
+        "model": "userportal.personstatus",
+        "pk": 1,
+        "fields": {
+            "name": "New",
+            "description": "Newly added person"
+        }
+    },
+    {
+        "model": "userportal.personstatus",
+        "pk": 2,
+        "fields": {
+            "name": "Email Sent",
+            "description": "Account creation email sent to person"
+        }
+    },
+    {
+        "model": "userportal.personstatus",
+        "pk": 3,
+        "fields": {
+            "name": "Details Filled",
+            "description": "The person has filled in their details"
+        }
+    },
+    {
+        "model": "userportal.personstatus",
+        "pk": 4,
+        "fields": {
+            "name": "Account Created",
+            "description": "The person's account has been created on the system"
+        }
+    },
+    {
+        "model": "userportal.personstatus",
+        "pk": 5,
+        "fields": {
+            "name": "Account Created Email Sent",
+            "description": "The account created/welcome email has been sent to the person"
+        }
+    },
+    {
+        "model": "userportal.personstatus",
+        "pk": 6,
+        "fields": {
+            "name": "Suspended",
+            "description": "Person's access to Pawsey Systems has been suspended"
+        }
+    }
+]
