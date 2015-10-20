@@ -1,4 +1,5 @@
 from django.db import models
+from pawseyportal.userportal.help_text import *
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
@@ -64,6 +65,9 @@ class Person(models.Model):
 
     def displayName(self):
         return self.firstName + ' ' + self.surname
+
+    def projectList(self):
+        return self.project_set.all()
 
     def __unicode__(self):
         return self.displayName()
