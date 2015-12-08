@@ -35,6 +35,7 @@ def listAllocationsView(request):
             alloc['priorityArea'] = allocation.priorityArea.name
             alloc['serviceunits'] = allocation.serviceunits
             alloc['service'] = allocation.service.name
+            alloc['projectCode'] = allocation.project.code
 
             response_data[allocation.id]=alloc
         return JsonResponse(response_data)

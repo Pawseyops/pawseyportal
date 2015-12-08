@@ -37,7 +37,7 @@ allocations = listAllocations(params)
 
 for allId ,allocation in allocations.iteritems():
     print("Project Name: %s" % (allocation["project"]))
-    print("Project ID: %s" % (allId))
+    print("Project Code: %s" % (allocation["projectCode"]))
     print("Allocation name: %s" % (allocation["name"]))
     print("Pawsey Service: %s" % (allocation["service"]))
     print("Priority Area: %s" % (allocation["priorityArea"]))
