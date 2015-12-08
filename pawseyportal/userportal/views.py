@@ -11,6 +11,7 @@ def listAllocationsView(request):
     #TODO: if authenticated or post variables exist for django.contrib.auth.authenticate authentication (to keep the python client simple for the heavy lifting of Pawsey account activation).
     
     # Make sure we are authenticated, or if not see if we can authenticate with POST variables.
+    user = request.user
     if user is  None:
         #check POST Variables or return
         raise PermissionDenied
