@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 def listAllocationsView(request):
     # Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.
     user = request.user
-    if user is  None:
+    if not user.is_authenticated():
         #check POST Variables or return
         if request.method == 'POST':
             usernm = request.POST["username"]
