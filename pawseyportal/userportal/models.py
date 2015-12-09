@@ -29,7 +29,7 @@ class PersonAccount(models.Model):
     gidNumber = models.IntegerField()
     passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True)
 
-    def __unicode(self):
+    def __unicode__(self):
         return self.uid   #TODO: relate this back to the Person to get name.
 
 class PersonStatus(models.Model):
