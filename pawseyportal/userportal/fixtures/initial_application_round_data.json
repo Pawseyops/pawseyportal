@@ -1,0 +1,12 @@
+[
+    {
+        "model": "userportal.allocationround",
+        "pk": 1,
+        "fields": {
+            "system": 1,
+            "start_date": "2000-01-01",
+            "end_date": "2000-01-01",
+            "name": "Dummy Allocation Round"
+        }
+    }
+]

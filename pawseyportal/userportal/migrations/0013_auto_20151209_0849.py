@@ -2,7 +2,12 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+from django.core.management import call_command
 
+def load_init_allocation_round(apps, schema_editor):
+    # Initial Status Data
+    fixture = 'initial_application_round_data'
+    call_command('loaddata', fixture, app_label='userportal') 
 
 class Migration(migrations.Migration):
 
@@ -22,6 +27,7 @@ class Migration(migrations.Migration):
                 ('system', models.ForeignKey(to='userportal.Service')),
             ],
         ),
+        migrations.RunPython(load_init_allocation_round),
         migrations.AlterField(
             model_name='allocation',
             name='name',

@@ -35,6 +35,9 @@ class ServiceTypeAdmin(admin.ModelAdmin):
 class ServiceAdmin(admin.ModelAdmin):
     list_display = ('name', 'type')
 
+class AllocationRoundAdmin(admin.ModelAdmin):
+    list_display = ('name', 'system', 'start_date', 'end_date')
+
 admin.site.register(Institution, InstitutionAdmin)
 admin.site.register(Person, PersonAdmin)
 admin.site.register(Project, ProjectAdmin)
@@ -44,3 +47,4 @@ admin.site.register(Service, ServiceAdmin)
 admin.site.register(ServiceType, ServiceTypeAdmin)
 admin.site.register(Filesystem)
 admin.site.register(PersonAccount)
+admin.site.register(AllocationRound, AllocationRoundAdmin)
