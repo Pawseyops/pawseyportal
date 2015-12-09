@@ -90,11 +90,11 @@ class PriorityArea(models.Model):
         return self.name
 
 class AllocationRound(models.Model):
-        system = models.ForeignKey(System, help_text=help_text_allocationround_system)
-        start_date = models.DateField(help_text=help_text_allocationround_start_date)
-        end_date = models.DateField(help_text=help_text_allocationround_end_date)
-        name = models.CharField(max_length=512, null=True, blank=True, help_text=help_text_allocationround_name)
-        priority_area = models.ManyToManyField(PriorityArea, help_text=help_text_allocationround_priority_area)
+        system = models.ForeignKey(Service)
+        start_date = models.DateField()
+        end_date = models.DateField()
+        name = models.CharField(max_length=512, null=True, blank=True)
+        priority_area = models.ManyToManyField(PriorityArea)
 
         def status(self):
             today = date.today()
