@@ -74,7 +74,7 @@ class Person(models.Model):
 
 class Project(models.Model):
     code = models.CharField(max_length=32)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=256)
     principalInvestigator = models.ForeignKey(Person, related_name='pi')
     summary = models.TextField()
     people = models.ManyToManyField(Person)
@@ -89,8 +89,32 @@ class PriorityArea(models.Model):
     def __unicode__(self):
         return self.name
 
+class AllocationRound(models.Model):
+        system = models.ForeignKey(System, help_text=help_text_allocationround_system)
+        start_date = models.DateField(help_text=help_text_allocationround_start_date)
+        end_date = models.DateField(help_text=help_text_allocationround_end_date)
+        name = models.CharField(max_length=512, null=True, blank=True, help_text=help_text_allocationround_name)
+        priority_area = models.ManyToManyField(PriorityArea, help_text=help_text_allocationround_priority_area)
+
+        def status(self):
+            today = date.today()
+            if today >= self.start_date and today <= self.end_date:
+                return "open"
+            elif today <= self.start_date:
+                return "pending"
+            else:
+                return "closed"
+
+        def __unicode__(self):
+            if self.name and len(self.name):
+                label = self.name
+            else:
+                label = self.system
+                return "%s: %s to %s" % (label, self.start_date.strftime('%d %b %Y'),
+                    self.end_date.strftime('%d %b %Y'))
+
 class Allocation(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=256)
     project = models.ForeignKey(Project)
     start = models.DateField()
     end = models.DateField()
@@ -99,6 +123,7 @@ class Allocation(models.Model):
     serviceunits = models.IntegerField()
     service = models.ForeignKey(Service)
     suspend = models.BooleanField(default = False)
+    allocation_round = models.ForeignKey(AllocationRound)
 
     def startQuarter(self):
         return str(self.start.year) + 'Q' + str((self.start.month-1)//3 + 1)
