@@ -110,7 +110,7 @@ class AllocationRound(models.Model):
                 label = self.name
             else:
                 label = self.system
-                return "%s: %s to %s" % (label, self.start_date.strftime('%d %b %Y'),
+            return "%s: %s to %s" % (label, self.start_date.strftime('%d %b %Y'),
                     self.end_date.strftime('%d %b %Y'))
 
 class Allocation(models.Model):
