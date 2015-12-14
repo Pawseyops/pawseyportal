@@ -96,6 +96,7 @@ def getProjectUsers(allocation):
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
 def activateAccount(user, allocation):
+    print ("Activating %s on allocation \"%s\" for project \"%s\"." % (user, allocation['name'], allocation['project']))
     return
 
 # Usage
