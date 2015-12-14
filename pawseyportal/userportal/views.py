@@ -46,6 +46,27 @@ def listAllocationsView(request):
     else:
             raise PermissionDenied
 
+# List all users in a Project
+@csrf_exempt
+def listPeople(request):
+    user = portalAuth(request)
+
+    if 'projectId' not in request.POST:
+        raise Http404("No project requested")
+    else:    
+        projectId = request.POST["projectId"]
+
+    if user.is_active and user.is_superuser:
+        response_data = {}
+        proj = Project.objects.get(id=projectId)
+        projectPeople = proj.people.all()
+        for person in projectPeople:
+            response_data[person]=projectPeople[person].personAccount.uid
+        return JsonResponse(response_data)
+    else:
+        raise PermissionDenied
+            
+
 # Get Person details for creating account
 @csrf_exempt
 def userDetailView(request):

@@ -76,7 +76,23 @@ def activateAllocation(allocation):
 # Get a list of users on a project that owns an allocation
 def getProjectUsers(allocation):
     print ("Getting list of users for project \"%s\" which has ID %s" % (allocation['project'], allocation['projectId']))
-    return
+    
+    authParams['projectId'] = allocation['projectId']
+
+    # Encode  Credentials and other parameters for POSTing
+    params = urllib.urlencode(authParams)
+
+    # Use httplib to request the data
+    conn = httplib.HTTPSConnection(servername)
+    listAllocationsUrl = url + "/portal/api/listPeople/"
+    conn.request("POST", listAllocationsUrl, params, headers)
+    response = conn.getresponse()
+    data = response.read()
+
+    # Unencode
+    users = json.loads(data)
+
+    return users
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
 def activateAccount(user, allocation):
@@ -99,8 +115,6 @@ servername = config.get('portal','servername')
 url = config.get('portal','url')
 
 authParams = {'username': username, 'password': password}
-
-#user = userDetails(params,2)
 
 # Get options
 try:
