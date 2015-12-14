@@ -50,20 +50,32 @@ def getAllocations(system, authParams):
 
     # Use httplib to request the data
     conn = httplib.HTTPSConnection(servername)
-    listAllocationsUrl = url + "/portal/api/listAllocations/" + system
+    listAllocationsUrl = url + "/portal/api/listAllocations/"
     conn.request("POST", listAllocationsUrl, params, headers)
     response = conn.getresponse()
     data = response.read()
 
-    # Unencode and return
-    return json.loads(data)
+    # Unencode
+    allocations = json.loads(data)
+
+    # Filter, if necessary and return
+    if system:
+        filteredAllocations = {}
+        for key in allocations:
+            if allocations[key]["service"] == system:
+                filteredAllocations[key] = allocations[key]
+        return filteredAllocations
+
+    return allocations
 
 # Check if an allocation is completely active on a system and activate/repair if not
 def activateAllocation(allocation):
+    print ("Work work work. I'm activating \"%s\" for \"%s\" with %s core hours on %s." % (allocation['name'], allocation['project'], allocation['serviceunits'], allocation['service']))
     return
 
 # Get a list of users on a project that owns an allocation
 def getProjectUsers(allocation):
+    print ("Getting list of users for project \"%s\" which has ID %s" % (allocation['project'], allocation['projectId']))
     return
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
@@ -102,9 +114,9 @@ except getopt.GetoptError as err:
 system = ''
 
 for opt, arg in opts:
-    if o in ("s","system"):
-        system = a
-    elif o in ("h","help"):
+    if opt in ("-s","-system"):
+        system = arg
+    elif opt in ("-h","-help"):
         usage()
         sys.exit(0)
 
@@ -118,11 +130,11 @@ if allocations == None:
 # Cycle through allocations
 for allocation in allocations:
     # Check if allocation is already fully set up on system and set it up if not
-    activateAllocation(allocation)
+    activateAllocation(allocations[allocation])
 
     # get list of project users for allocation
-    users = []
-    users = getProjectUsers(allocation)
+    users ={} 
+    users = getProjectUsers(allocations[allocation])
 
     if users == None:
         print "This project has no users. How can that be?"
@@ -130,5 +142,5 @@ for allocation in allocations:
     else:
         # Process users for allocation to make sure they are activated and set up for the current allocation
         for user in users:
-            activateAccount(user, allocation)
+            activateAccount(users[user], allocations[allocation])
 
