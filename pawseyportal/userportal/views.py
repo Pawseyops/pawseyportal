@@ -48,7 +48,7 @@ def listAllocationsView(request):
 
 # List all users in a Project
 @csrf_exempt
-def listPeople(request):
+def listPeopleView(request):
     user = portalAuth(request)
 
     if 'projectId' not in request.POST:
