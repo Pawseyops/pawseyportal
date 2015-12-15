@@ -6,10 +6,52 @@ import ConfigParser
 import os
 import sys
 import getopt
+import ldap
+import ldap.modlist as modlist
 
 #
-# Obtain User Details from Pawsey Portal for inserting into LDAP. Includes user initial password
+# Create LDAP, Filesystem and Scheduler portions of allocations, projects and accounts. Does nothing if everything is in place so can be run at any time. Includes user initial password
 #
+
+# Get an LDAP connection for use in other parts of the script
+def initLDAP():
+    ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+    try:
+        l = ldap.initialize(ldapUri)
+    except ldap.LDAPError, e:
+        print e
+        exit(1)
+
+    l.simple_bind(ldapBindDN, ldapBindPW)
+
+    return l
+
+# Check for user's existance in LDAP
+def ldapExistanceCheck(user):
+    # Get an appropriate LDAP Object
+    pawseyLdap = initLDAP()
+    searchFilter = ("uid=%s" % user)
+    try:
+        ldap_result_id = pawseyLdap.search(ldapBaseDN, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
+        result_data = []
+        result_type, result_data = pawseyLdap.result(ldap_result_id, 0)
+        if (result_data == []):
+            print ("User %s does not exist" % user)
+            return 0
+        else:
+            print ("User %s does exist" % user)
+            return 1
+    except ldap.LDAPError, e:
+        print e
+        exit(1)
+
+# Create user in LDAP
+def createLdapUser(user, personId):
+    # Need to get user details and then pump them into ldap to create a user and a group
+    userDict = userDetails(personId)
+
+    
+    return
 
 # Obtain list of Allocations
 def listAllocations(authParams):
@@ -25,7 +67,7 @@ def listAllocations(authParams):
     return json.loads(data)
 
 # Obtain user details
-def userDetails(authParams, personId):
+def userDetails(personId):
     
     authParams['person'] = personId
 
@@ -95,8 +137,28 @@ def getProjectUsers(allocation):
     return users
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
-def activateAccount(user, allocation):
+def activateAccount(user, allocation, personId):
     print ("Activating %s on allocation \"%s\" for project \"%s\"." % (user, allocation['name'], allocation['project']))
+    
+    # Check whether account is populated in LDAP, if not trigger ldap creation (or wait for details to be filled in).
+    if not (ldapExistanceCheck(user)):
+        print ("User %s doesn't exist in ldap, attempting to create" % (user))
+        createLdapUser(user, personId)
+        
+    # Add user to Allocation in ldap if they aren't already
+    if not (ldapAllocationCheck(user,allocation)):
+        print ("User %s isn't attached to allocation \"%s\", so attaching them" % (user,allocation['name']))
+        attachLdapUser(user, allocation)
+
+    # Check User has a home directory on the appropriate system and create if not. Also create /group and /scratch directory (manual workaround for /scratch2 for now)
+    checkUserDirectories(user, allocation)
+
+    # Check Slurm configuration for user. Add any missing pieces.
+    checkUserSlurmAllocation(user, allocation)
+
+    # Traditional last step: Put user in correct host group if they are not already
+    checkUserHostGroup(user, allocation['service'])
+        
     return
 
 # Usage
@@ -114,6 +176,14 @@ headers = {"Content-type": "application/x-www-form-urlencoded", "Accept": "text/
 
 servername = config.get('portal','servername')
 url = config.get('portal','url')
+
+# Ldap config
+ldapUri = config.get('ldap','uri')
+ldapBaseDN = config.get('ldap','baseDN')
+ldapBindDN = config.get('ldap','bindDN')
+ldapBindPW = config.get('ldap','bindPW')
+ldapSearchScope = ldap.SCOPE_SUBTREE
+ldapRetrieveAttributes = None
 
 authParams = {'username': username, 'password': password}
 
@@ -157,5 +227,6 @@ for allocation in allocations:
     else:
         # Process users for allocation to make sure they are activated and set up for the current allocation
         for user in users:
-            activateAccount(users[user], allocations[allocation])
+            print user
+            activateAccount(users[user], allocations[allocation], user) # That last argument is the Person.id. You'll be glad you had it later.
 
