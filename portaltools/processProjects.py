@@ -49,8 +49,62 @@ def ldapExistanceCheck(user):
 def createLdapUser(user, personId):
     # Need to get user details and then pump them into ldap to create a user and a group
     userDict = userDetails(personId)
-
+    print userDict
     
+    # Required details: Given Name, sn, Username, uidnumber, gidnumber (use username for gid), password hash, email address, phone number
+    if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "userPassword", "telephoneNumber", "institution")):
+        print "we are here"
+        # Process them
+        pawseyLdap = initLDAP()
+        # DN for the new user entry
+        dn = ("uid=%s,ou=%s,ou=People,%s" % (userDict["uid"], userDict["institution"], ldapBaseDN))
+        # Attributes for the new entry
+        attrs = {}
+        attrs['objectclass'] = ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount', 'inetUser']
+        attrs['cn'] = ("%s %s" % (userDict['givenName'], userDict['sn'])).encode("utf8")
+        attrs['givenName'] = userDict['givenName'].encode("utf8")
+        attrs['sn'] = userDict['sn'].encode("utf8")
+        attrs['uid'] = userDict['uid'].encode("utf8")
+        attrs['uidNumber'] = str(userDict['uidNumber'])
+        attrs['gidNumber'] = str(userDict['gidNumber'])
+        attrs['loginShell'] = '/bin/bash'
+        attrs['mail'] = userDict['mail'].encode("utf8")
+        attrs['homeDirectory'] = ("/home/%s" % (userDict['uid'])).encode("utf8")
+        attrs['userPassword'] = userDict['userPassword'].encode("utf8")
+        attrs['telephoneNumber'] = userDict['telephoneNumber'].encode("utf8")
+
+        print attrs
+        print dn
+
+        # Make the attributes dictionary into something we can throw at an ldap server
+        ldif = modlist.addModlist(attrs)
+
+        print ldif
+        # Throw it at the ldap server!
+        try: 
+            pawseyLdap.add_s(dn,ldif)
+        except ldap.LDAPError, e:
+            print e
+            exit(1)
+
+        # Now create their group
+        dn = ("cn=%s,ou=POSIX,ou=Groups,%s" % (userDict["uid"], ldapBaseDN))
+        # Attributes for the new entry
+        attrs = {}
+        attrs['objectclass'] = ['top', 'posixGroup']
+        attrs['cn'] = userDict['uid'].encode("utf8")
+        attrs['gidNumber'] = str(userDict['gidNumber'])
+
+        # Make the attributes dictionary into something we can throw at an ldap server
+        ldif = modlist.addModlist(attrs)
+
+        # Throw it at the ldap server!
+        try: 
+            pawseyLdap.add_s(dn,ldif)
+        except ldap.LDAPError, e:
+            print e
+            exit(1)
+
     return
 
 # Obtain list of Allocations

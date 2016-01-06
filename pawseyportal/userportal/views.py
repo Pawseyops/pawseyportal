@@ -88,6 +88,7 @@ def userDetailView(request):
         response_data['mail'] = person.institutionEmail
         response_data['userPassword'] = person.personAccount.passwordHash
         response_data['telephoneNumber'] = person.phone
+        response_data['institution'] = person.institution.name
         
         return JsonResponse(response_data)
     else:
