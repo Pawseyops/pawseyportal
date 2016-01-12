@@ -22,7 +22,7 @@ def initLDAP():
         print e
         exit(1)
 
-    l.simple_bind(ldapBindDN, ldapBindPW)
+    l.simple_bind_s(ldapBindDN, ldapBindPW)
 
     return l
 
@@ -35,12 +35,52 @@ def ldapExistanceCheck(user):
         ldap_result_id = pawseyLdap.search(ldapBaseDN, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
         result_data = []
         result_type, result_data = pawseyLdap.result(ldap_result_id, 0)
+        pawseyLdap.unbind_s()
         if (result_data == []):
             print ("User %s does not exist" % user)
             return 0
         else:
             print ("User %s does exist" % user)
             return 1
+    except ldap.LDAPError, e:
+        print  ("In ldapExistanceCheck: %s" % e)
+        exit(1)
+
+# Check that the Institution OU exists and create it if not
+def checkParentOu(institutionOu):
+    pawseyLdap = initLDAP()
+    searchFilter = ("ou=%s" % institutionOu)
+    baseDn = ("ou=People,%s" % ldapBaseDN)
+
+    try:
+        ldap_result_id = pawseyLdap.search(baseDn, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
+        result_data = []
+        result_type, result_data = pawseyLdap.result(ldap_result_id, 0)
+        pawseyLdap.unbind_s()
+        if (result_data == []):
+            print ("OU %s does not exist, creating" % institutionOu)
+            
+            pawseyLdap = initLDAP()
+            # This is basDn created above, not ldapBaseDN
+            dn = 'ou=%s,%s' % (institutionOu, baseDn)
+
+            attrs = {}
+            attrs['ou'] = str(institutionOu) 
+            attrs['objectClass'] = 'organizationalunit'
+            
+            # Make the attributes dictionary into something we can throw at an ldap server
+            ldif = modlist.addModlist(attrs)
+
+            # Throw it at the ldap server!
+            try: 
+                pawseyLdap.add_s(dn,ldif)
+            except ldap.LDAPError, e:
+                print e
+                exit(1)
+            return 0
+
+        else:
+            return 0
     except ldap.LDAPError, e:
         print e
         exit(1)
@@ -49,13 +89,16 @@ def ldapExistanceCheck(user):
 def createLdapUser(user, personId):
     # Need to get user details and then pump them into ldap to create a user and a group
     userDict = userDetails(personId)
-    print userDict
-    
+
     # Required details: Given Name, sn, Username, uidnumber, gidnumber (use username for gid), password hash, email address, phone number
     if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "userPassword", "telephoneNumber", "institution")):
-        print "we are here"
         # Process them
+
+        checkParentOu(userDict['institution'])
+
         pawseyLdap = initLDAP()
+
+        # Check that OU exists
         # DN for the new user entry
         dn = ("uid=%s,ou=%s,ou=People,%s" % (userDict["uid"], userDict["institution"], ldapBaseDN))
         # Attributes for the new entry
@@ -73,13 +116,10 @@ def createLdapUser(user, personId):
         attrs['userPassword'] = userDict['userPassword'].encode("utf8")
         attrs['telephoneNumber'] = userDict['telephoneNumber'].encode("utf8")
 
-        print attrs
-        print dn
 
         # Make the attributes dictionary into something we can throw at an ldap server
         ldif = modlist.addModlist(attrs)
 
-        print ldif
         # Throw it at the ldap server!
         try: 
             pawseyLdap.add_s(dn,ldif)
@@ -104,6 +144,8 @@ def createLdapUser(user, personId):
         except ldap.LDAPError, e:
             print e
             exit(1)
+
+        pawseyLdap.unbind_s()
 
     return
 
