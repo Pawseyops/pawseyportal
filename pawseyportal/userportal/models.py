@@ -3,21 +3,21 @@ from pawseyportal.userportal.help_text import *
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=256)
     helpEmail = models.EmailField(max_length=254)
 
     def __unicode__(self):
         return self.name
 
 class Service(models.Model):
-    name = models.CharField(max_length=32)
+    name = models.CharField(max_length=256)
     type = models.ForeignKey(ServiceType)
 
     def __unicode__(self):
         return self.name
 
 class Institution(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=256)
     partner = models.BooleanField(default = False)
 
     def __unicode__(self):
@@ -74,7 +74,7 @@ class Person(models.Model):
 
 class Project(models.Model):
     code = models.CharField(max_length=32)
-    title = models.CharField(max_length=256)
+    title = models.CharField(max_length=1024)
     principalInvestigator = models.ForeignKey(Person, related_name='pi')
     summary = models.TextField()
     people = models.ManyToManyField(Person)
@@ -83,8 +83,8 @@ class Project(models.Model):
         return self.title
 
 class PriorityArea(models.Model):
-    name = models.CharField(max_length=32)
-    code = models.CharField(max_length=32)
+    name = models.CharField(max_length=256)
+    code = models.CharField(max_length=256)
 
     def __unicode__(self):
         return self.name

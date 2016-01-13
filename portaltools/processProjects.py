@@ -26,6 +26,39 @@ def initLDAP():
 
     return l
 
+# Check that the user is part of the allocation group in ldap
+def ldapAllocationCheck(user, allocation):
+    # Get an appropriate LDAP Object
+    pawseyLdap = initLDAP()
+    searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
+    results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
+    for result in results:
+        result_attrs = result[1]
+        if user in result_attrs['memberUid']:
+            return 1
+        else:
+            return 0
+    return 0
+
+# Check for Project'd existance in LDAP
+def ldapProjectExistanceCheck(projectCode):
+    pawseyLdap = initLDAP()
+    searchFilter = ("cn=%s" % projectCode)
+    try:
+        ldap_result_id = pawseyLdap.search(ldapBaseDN, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
+        result_data = []
+        result_type, result_data = pawseyLdap.result(ldap_result_id, 0)
+        pawseyLdap.unbind_s()
+        if (result_data == []):
+            print ("Project %s does not exist" % projectCode)
+            return 0
+        else:
+            print ("Project %s does exist" % projectCode)
+            return 1
+    except ldap.LDAPError, e:
+        print  ("In ldapProjectExistanceCheck: %s" % e)
+
+
 # Check for user's existance in LDAP
 def ldapExistanceCheck(user):
     # Get an appropriate LDAP Object
@@ -85,6 +118,34 @@ def checkParentOu(institutionOu):
         print e
         exit(1)
 
+# Create Project in LDAP
+def createLdapProject(projectCode, projectId, priorityArea, service = ''):
+
+    gidNumber = str(33000 + projectId)
+    
+    pawseyLdap = initLDAP()
+
+    # dn for new entry
+    dn = ("cn=%s, ou=%s,ou=Projects,ou=Groups,%s" % (projectCode, priorityArea, ldapBaseDN))
+    # Attributes for new entry
+    attrs = {}
+    attrs['objectclass'] = ['top', 'posixGroup', 'hostObject']
+    attrs['cn'] = projectCode.encode("utf8")
+    attrs['gidnumber'] = gidNumber
+    attrs['memberUid'] = 'dummy'
+    attrs['host'] = service.encode("utf8")
+    
+    # Make the attributes dictionary into something we can throw at an ldap server
+    ldif = modlist.addModlist(attrs)
+
+    # Throw it at the ldap server!
+    try: 
+        pawseyLdap.add_s(dn,ldif)
+    except ldap.LDAPError, e:
+        print e
+        exit(1)
+
+
 # Create user in LDAP
 def createLdapUser(user, personId):
     # Need to get user details and then pump them into ldap to create a user and a group
@@ -94,11 +155,11 @@ def createLdapUser(user, personId):
     if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "userPassword", "telephoneNumber", "institution")):
         # Process them
 
+        # Check that OU exists
         checkParentOu(userDict['institution'])
 
         pawseyLdap = initLDAP()
 
-        # Check that OU exists
         # DN for the new user entry
         dn = ("uid=%s,ou=%s,ou=People,%s" % (userDict["uid"], userDict["institution"], ldapBaseDN))
         # Attributes for the new entry
@@ -148,6 +209,22 @@ def createLdapUser(user, personId):
         pawseyLdap.unbind_s()
 
     return
+
+# Attach an ldap user to a project(allocation)
+def attachLdapUser(user, allocation):
+    pawseyLdap = initLDAP()
+
+    mod_attrs = [( ldap.MOD_ADD, 'memberUid', user.encode('utf8') )]
+
+    dn = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
+
+    try: 
+        print "Adding user to project in ldap"
+        pawseyLdap.modify_s(dn, mod_attrs)
+    except ldap.LDAPError,e:
+        print e
+        exit(1)
+    return 
 
 # Obtain list of Allocations
 def listAllocations(authParams):
@@ -209,6 +286,13 @@ def getAllocations(system, authParams):
 # Check if an allocation is completely active on a system and activate/repair if not
 def activateAllocation(allocation):
     print ("Work work work. I'm activating \"%s\" for \"%s\" with %s core hours on %s." % (allocation['name'], allocation['project'], allocation['serviceunits'], allocation['service']))
+
+    # Create Allocation in ldap if it's not already there
+    if not (ldapProjectExistanceCheck(allocation['projectCode'])):
+        print ("Project %s doesn't exist in ldap, attempting to create" % (allocation['projectCode']))
+        createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'])
+    
+
     return
 
 # Get a list of users on a project that owns an allocation
@@ -247,13 +331,13 @@ def activateAccount(user, allocation, personId):
         attachLdapUser(user, allocation)
 
     # Check User has a home directory on the appropriate system and create if not. Also create /group and /scratch directory (manual workaround for /scratch2 for now)
-    checkUserDirectories(user, allocation)
+    #checkUserDirectories(user, allocation)
 
     # Check Slurm configuration for user. Add any missing pieces.
-    checkUserSlurmAllocation(user, allocation)
+    #checkUserSlurmAllocation(user, allocation)
 
     # Traditional last step: Put user in correct host group if they are not already
-    checkUserHostGroup(user, allocation['service'])
+    #checkUserHostGroup(user, allocation['service'])
         
     return
 
@@ -323,6 +407,5 @@ for allocation in allocations:
     else:
         # Process users for allocation to make sure they are activated and set up for the current allocation
         for user in users:
-            print user
             activateAccount(users[user], allocations[allocation], user) # That last argument is the Person.id. You'll be glad you had it later.
 
