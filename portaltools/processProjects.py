@@ -80,6 +80,45 @@ def ldapExistanceCheck(user):
         exit(1)
 
 # Check that the Institution OU exists and create it if not
+def checkPriorityParentOu(priorityAreaOu):
+    pawseyLdap = initLDAP()
+    searchFilter = ("ou=%s" % priorityAreaOu)
+    baseDn = ("ou=Projects,ou=Groups,%s" % ldapBaseDN)
+
+    try:
+        ldap_result_id = pawseyLdap.search(baseDn, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
+        result_data = []
+        result_type, result_data = pawseyLdap.result(ldap_result_id, 0)
+        pawseyLdap.unbind_s()
+        if (result_data == []):
+            print ("OU %s does not exist, creating" % priorityAreaOu)
+            
+            pawseyLdap = initLDAP()
+            # This is basDn created above, not ldapBaseDN
+            dn = 'ou=%s,%s' % (priorityAreaOu, baseDn)
+
+            attrs = {}
+            attrs['ou'] = str(priorityAreaOu) 
+            attrs['objectClass'] = 'organizationalunit'
+            
+            # Make the attributes dictionary into something we can throw at an ldap server
+            ldif = modlist.addModlist(attrs)
+
+            # Throw it at the ldap server!
+            try: 
+                pawseyLdap.add_s(dn,ldif)
+            except ldap.LDAPError, e:
+                print e
+                exit(1)
+            return 0
+
+        else:
+            return 0
+    except ldap.LDAPError, e:
+        print e
+        exit(1)
+
+# Check that the Institution OU exists and create it if not
 def checkParentOu(institutionOu):
     pawseyLdap = initLDAP()
     searchFilter = ("ou=%s" % institutionOu)
@@ -122,6 +161,8 @@ def checkParentOu(institutionOu):
 def createLdapProject(projectCode, projectId, priorityArea, service = ''):
 
     gidNumber = str(33000 + projectId)
+
+    checkPriorityParentOu(priorityArea)
     
     pawseyLdap = initLDAP()
 
@@ -394,6 +435,11 @@ if allocations == None:
 
 # Cycle through allocations
 for allocation in allocations:
+    
+    if (allocations[allocation]['projectCode'] == ''):
+        print "Project does not have a project code yet, skipping"
+        continue
+
     # Check if allocation is already fully set up on system and set it up if not
     activateAllocation(allocations[allocation])
 
