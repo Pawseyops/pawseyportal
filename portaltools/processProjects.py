@@ -8,6 +8,7 @@ import sys
 import getopt
 import ldap
 import ldap.modlist as modlist
+from datetime import date
 
 #
 # Create LDAP, Filesystem and Scheduler portions of allocations, projects and accounts. Does nothing if everything is in place so can be run at any time. Includes user initial password
@@ -40,8 +41,22 @@ def ldapAllocationCheck(user, allocation):
             return 0
     return 0
 
+# Add entry for this year into the host attribute of a project
+def ldapAddHostAttribute(dn, service):
+    pawseyLdap = initLDAP()
+    mod_attrs = [( ldap.MOD_ADD, 'host', ("%s%s" % ( service.encode("utf8"), str(date.today().year))) )]
+
+    try:
+        print "Adding host attribute to object."
+        pawseyLdap.modify(dn, mod_attrs)
+    except ldap.LDAPError, e:
+        print e
+        exit(1)
+
+    return 1
+
 # Check for Project'd existance in LDAP
-def ldapProjectExistanceCheck(projectCode):
+def ldapProjectExistanceCheck(projectCode, service):
     pawseyLdap = initLDAP()
     searchFilter = ("cn=%s" % projectCode)
     try:
@@ -54,6 +69,7 @@ def ldapProjectExistanceCheck(projectCode):
             return 0
         else:
             print ("Project %s does exist" % projectCode)
+            ldapAddHostAttribute(result_data[0][0], service)
             return 1
     except ldap.LDAPError, e:
         print  ("In ldapProjectExistanceCheck: %s" % e)
@@ -174,7 +190,7 @@ def createLdapProject(projectCode, projectId, priorityArea, service = ''):
     attrs['cn'] = projectCode.encode("utf8")
     attrs['gidnumber'] = gidNumber
     attrs['memberUid'] = 'dummy'
-    attrs['host'] = service.encode("utf8")
+    attrs['host'] = ("%s%s" % ( service.encode("utf8"), str(date.today().year)))
     
     # Make the attributes dictionary into something we can throw at an ldap server
     ldif = modlist.addModlist(attrs)
@@ -195,6 +211,9 @@ def createLdapUser(user, personId):
     # Required details: Given Name, sn, Username, uidnumber, gidnumber (use username for gid), password hash, email address, phone number
     if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "userPassword", "telephoneNumber", "institution")):
         # Process them
+        if (userDict['uid'] == '' or userDict['uidNumber'] == '' or userDict['userPassword'] == '') :
+            print "User has not filled in all their details, not creating account"
+            return
 
         # Check that OU exists
         checkParentOu(userDict['institution'])
@@ -329,7 +348,7 @@ def activateAllocation(allocation):
     print ("Work work work. I'm activating \"%s\" for \"%s\" with %s core hours on %s." % (allocation['name'], allocation['project'], allocation['serviceunits'], allocation['service']))
 
     # Create Allocation in ldap if it's not already there
-    if not (ldapProjectExistanceCheck(allocation['projectCode'])):
+    if not (ldapProjectExistanceCheck(allocation['projectCode'], allocation['service'])):
         print ("Project %s doesn't exist in ldap, attempting to create" % (allocation['projectCode']))
         createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'])
     
@@ -359,6 +378,10 @@ def getProjectUsers(allocation):
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
 def activateAccount(user, allocation, personId):
+    if user == '':
+        print "Username is empty, no point in continuing with this one"
+        return
+
     print ("Activating %s on allocation \"%s\" for project \"%s\"." % (user, allocation['name'], allocation['project']))
     
     # Check whether account is populated in LDAP, if not trigger ldap creation (or wait for details to be filled in).
