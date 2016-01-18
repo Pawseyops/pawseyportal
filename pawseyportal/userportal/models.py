@@ -55,6 +55,7 @@ class Person(models.Model):
     institutionEmail = models.EmailField(max_length=64)
     preferredEmail = models.EmailField(max_length=64)
     phone = models.CharField(max_length=32)
+    mobilePhone = models.CharField(max_length=32, null=True)
     student = models.BooleanField(default = False)
     personAccount = models.ForeignKey('PersonAccount', null=True, related_name='person')    
     accountEmailHash = models.CharField(max_length=50, null=True, blank=True)
