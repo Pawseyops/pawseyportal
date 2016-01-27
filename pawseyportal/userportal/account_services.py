@@ -49,10 +49,10 @@ def send_mail(subject, message, to):
 def hash_password(newpassword, pwencoding='ssha'):
     return ldap_helper.createpassword(newpassword, pwencoding=pwencoding)
 
-@transaction.commit_on_success
+@transaction.atomic
 def save_account_details(person):
     person_account = person.personAccount
-    person.status_id = Participant.STATUS['DETAILS_FILLED']
+    person.status_id = Person.STATUS['DETAILS_FILLED']
     person.details_filled_on = datetime.datetime.now()
     #make sure the uid is valid
     person_account.uid = person_account.get_unique_uid()
@@ -60,3 +60,16 @@ def save_account_details(person):
     person_account.constrain_uidgid() #'fixes' the uidnumber/gidnumber and saves
      
     person.save()
+
+def check_unique_uid(uid):
+    if uid is None or len(uid) == 0:
+        return False
+    qs = PersonAccount.objects.filter(uid = uid)
+    if len(qs) == 0:
+        #There were none. OK!
+        return True
+    elif (len(qs) == 1) and qs[0].id == self.id:
+        #There was one, but it was me.
+        return True
+    else:
+        return False

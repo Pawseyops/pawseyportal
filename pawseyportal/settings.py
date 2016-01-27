@@ -103,6 +103,14 @@ AUTH_LDAP_USER_ATTR_MAP = {
     "email": "mail"
 }
 
+# LDAP User Directory 
+USER_LDAP_SERVER = "ldap://ldap.example.com"
+USER_LDAP_GROUP = "example"
+USER_LDAP_GROUP_BASE = "example"
+USER_LDAP_ADMIN_BASE = "example"
+USER_LDAP_USER_BASE = "example"
+
+
 LOGIN_URL = "%s/%s"%(MYURL,'login/')
 LOGIN_REDIRECT_URL = "%s/%s"%(MYURL,'pawseyportal/')
 

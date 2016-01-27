@@ -172,7 +172,7 @@ def user_ldap_handler():
                                  dont_require_cert=True, debug=True)
 
 class LDAPHandler(object):
-    def __init__(self, userdn=None, password=None, server = settings.AUTH_LDAP_SERVER, group = settings.AUTH_LDAP_GROUP, group_base = settings.AUTH_LDAP_GROUP_BASE, admin_base = settings.AUTH_LDAP_ADMIN_BASE, user_base = settings.AUTH_LDAP_USER_BASE, dont_require_cert=None, debug=None):
+    def __init__(self, userdn=None, password=None, server = settings.USER_LDAP_SERVER, group = settings.USER_LDAP_GROUP, group_base = settings.USER_LDAP_GROUP_BASE, admin_base = settings.USER_LDAP_ADMIN_BASE, user_base = settings.USER_LDAP_USER_BASE, dont_require_cert=None, debug=None):
         '''This class makes use of the 'settings' module, which should be accessible from the current scope.'''
         try:
             #If require_cert is not specified, check settings
@@ -191,7 +191,7 @@ class LDAPHandler(object):
             else:
                 LDAP_DEBUG = debug
             
-            # check our AUTH_LDAP_SERVER setting. If its a string, turn it to a list. Then we iterate over the list trying servers.
+            # check our USER_LDAP_SERVER setting. If its a string, turn it to a list. Then we iterate over the list trying servers.
             server_list = [server] if type(server)==str else list(server)
             
             server_live = False

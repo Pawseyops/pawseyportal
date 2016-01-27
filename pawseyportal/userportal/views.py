@@ -5,6 +5,7 @@ from forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
+import account_services
 
 import datetime
 
@@ -38,7 +39,7 @@ def userDetailsRequest(request, email_hash):
             person.phone = form.cleaned_data.get('phone')
             person_account.password_hash = account_services.hash_password(form.cleaned_data.get('password1'))
 
-            account_services.save_account_details(participant)
+            account_services.save_account_details(person)
             request.session[PROCESSED_PARTICIPANT_SESSION_KEY] = email_hash
             return HttpResponseRedirect(siteurl(request) + 'account-details/thanks')
     else:
