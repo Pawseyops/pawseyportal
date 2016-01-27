@@ -16,7 +16,7 @@ Should you have any problem completing this form please contact <a href="mailto:
 <form action="." method="POST" style="float: none;">{% csrf_token %}
     <p>Use of Pawsey Supercomputing Centre infrastructure is subject to <a href="http://portal.pawsey.org.au/docs/Conditions_of_Use">Conditions of Use</a>. Please ensure that you have read these conditions and indicate you agree to these conditions below.</p>
     <p>
-        Your email address is: {{ participant_email }}.
+        Your email address is: {{ person_email }}.
     </p>
     <table>
         {{ form.as_table }}
