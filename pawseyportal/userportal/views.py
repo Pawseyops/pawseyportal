@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 def userDetailsRequest(request, email_hash):
     # Note that this relies on the hash being unique in the database, if it isn't for some reason we still want to throw the error.
     try:
-        person = Person.objects.get(account_email_hash=email_hash)
+        person = Person.objects.get(accountEmailHash=email_hash)
     except Person.DoesNotExist:
         return render_to_response('userportal/invalid_hash.html', {})
 

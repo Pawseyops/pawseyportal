@@ -22,7 +22,7 @@ def send_account_creation_mail(person, request):
     subject, message = template.render_to_string({'participant': person, 'link': link})
     send_mail(subject, message, person.institutionEmail)
 
-    person.account_email_hash = email_hash
+    person.accountEmailHash = email_hash
     person.status = Participant.STATUS['EMAIL_SENT']
     person.accountEmailOn = datetime.datetime.now()
     person.save()
