@@ -55,7 +55,6 @@ def save_account_details(person):
     person.status_id = Person.STATUS['DETAILS_FILLED']
     person.details_filled_on = datetime.datetime.now()
     #make sure the uid is valid
-    person_account.uid = person_account.get_unique_uid()
     person_account.save()
     person_account.constrain_uidgid() #'fixes' the uidnumber/gidnumber and saves
      

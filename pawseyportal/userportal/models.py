@@ -29,6 +29,33 @@ class PersonAccount(models.Model):
     gidNumber = models.IntegerField()
     passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True)
 
+    def constrain_uidgid(self):
+        '''Ensures the users uidnumber and gidnumber are over 20k, and unique in the database.
+           Can only be called after the user has already been saved.
+        '''
+        offset = 21000
+        maxid = 29999
+        # Make sure the new LDAP uid doesn't already exist on the Epic LDAP server
+        # Iterate 5 times, which should be ample. If we hit the end, it might require
+        # human intervention anyway so chuck an exception.
+        pawseyLdap = user_ldap_handler()
+        for newid in range(self.id + offset, self.id + offset + 100):
+            if newid > maxid:
+                raise Exception('Maximum LDAP uidNumber of %s exceeded'%maxid)
+            user = pawseyLdap.get_user_details_from_attribute(attribute = 'uidNumber', value = newid)
+            if not len(user):
+                break
+        else:
+            raise Exception('Difficulty allocating an LDAP uidNumber for ParticipantAccount=%s.'\
+                'Tried %s - %s, but they were all unavailable in ldap'%(self.id, self.id + offset, newid))
+        
+        if ( (self.uid_number != newid) or (self.gid_number != newid)):
+            self.uid_number = newid
+            self.gid_number = newid
+            self.save()
+        
+        return newid
+
     def __unicode__(self):
         return self.uid   #TODO: relate this back to the Person to get name.
 
