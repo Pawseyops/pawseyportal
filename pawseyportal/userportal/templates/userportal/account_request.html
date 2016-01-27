@@ -1,7 +1,8 @@
-<%inherit file="userportal/base.html" />
+{% extends "userportal/base.html" %}
 
-<%def name="title()">Registration for Resources on Pawsey Supercomputing Centre Infrastructure</%def>
+{% block title %}Account Creation for Resources on Pawsey Supercomputing Centre Infrastructure{% endblock %}
 
+{% block content %}
 <div style="margin: 1em;">
 <p>
 Please complete your details and submit the form in order to progress your account creation. 
@@ -20,9 +21,8 @@ Should you have any problem completing this form please contact <a href="mailto:
     <table>
         ${ form.as_table() }
     </table>
-
-    <p class="submit-row">
+<p class="submit-row">
         <input type="submit" value="Submit" />
     </p>
 </form>
-
+{% endblock %}

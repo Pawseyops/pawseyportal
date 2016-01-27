@@ -1,7 +1,9 @@
 <%inherit file="userportal/base.html" />
+{% extends "userportal/base.html" %}
 
-<%def name="title()">2014 Application for Resources on Pawsey-Funded iVEC Infrastructure</%def>
+{% block title %}Account Creation for on Pawsey-Funded iVEC Infrastructure{% endblock %}
 
+{% block content %}
 <h3>
     The URL you are trying to use is either invalid or it has expired.
 </h3>
@@ -9,4 +11,4 @@
     For further assistance please contact
     <a href="mailto:help@pawsey.org.au">help@pawsey.org.au</a> .
 </p>
-
+{% endblock %}
