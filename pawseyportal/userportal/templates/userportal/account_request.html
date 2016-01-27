@@ -1,0 +1,28 @@
+<%inherit file="userportal/base.html" />
+
+<%def name="title()">Registration for Resources on Pawsey Supercomputing Centre Infrastructure</%def>
+
+<div style="margin: 1em;">
+<p>
+Please complete your details and submit the form in order to progress your account creation. 
+</p>
+
+<p>
+Should you have any problem completing this form please contact <a href="mailto:help@pawsey.org.au">help@pawsey.org.au</a>
+</p>
+</div>
+
+<form action="." method="POST" style="float: none;">${ csrf_tag(csrf_token) }
+    <p>Use of Pawsey Supercomputing Centre infrastructure is subject to <a href="http://portal.pawsey.org.au/docs/Conditions_of_Use">Conditions of Use</a>. Please ensure that you have read these conditions and indicate you agree to these conditions below.</p>
+    <p>
+        Your email address is: ${ participant_email }.
+    </p>
+    <table>
+        ${ form.as_table() }
+    </table>
+
+    <p class="submit-row">
+        <input type="submit" value="Submit" />
+    </p>
+</form>
+

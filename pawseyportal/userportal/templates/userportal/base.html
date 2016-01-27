@@ -1,0 +1,31 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{% static 'userportal/css/pawsey.css' %}" />
+    <title>{% block title %}Pawsey User Portal{% endblock %}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+    <meta name="Robots" content="noindex, nofollow" >
+    <meta name="GOOGLEBOT" content="noarchive" >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+    <div class="container">
+        <img src="{% static 'userportal/images/PawseyLogoHorizontal.png' %}" alt="Pawsey Supercomputing Centre">
+        <h2>Announcements</h2>
+        
+        <hr>
+        {% block content %}{% endblock %}
+        {% if perms.userportal %}
+                 <a href="{% url 'logout' %}">Logout</a>&nbsp;&nbsp;&nbsp;&nbsp;  
+        {% endif %}
+        {% if request.resolver_match.url_name != 'index' %}
+        <a href="{% url 'portal:index' %}">Back to Index</a>
+        {% endif %}
+        <hr>
+        <small>Copyright Pawsey Supercomputing Centre 2015 <a href="http://www.pawsey.org.au/">www.pawsey.org.au</a></small>
+    </div>
+
+</body>
+</html>

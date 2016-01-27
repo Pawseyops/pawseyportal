@@ -7,10 +7,43 @@ from django.core.exceptions import PermissionDenied
 
 import datetime
 
-# The API is meant to not require the csrf headers.
+# The API is meant to not require the csrf headers. Do no decorate any of the user facing non api views with this.
 from django.views.decorators.csrf import csrf_exempt
 
-# Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.
+# Get user details for user creation
+def userDetailsRequest(request, email_hash):
+    # Note that this relies on the hash being unique in the database, if it isn't for some reason we still want to throw the error.
+    try:
+        person = Person.objects.get(account_email_hash=email_hash)
+    except Person.DoesNotExist:
+        return render_to_response('userportal/invalid_hash.html', {})
+
+    try:
+        person_account = person.personaccountaccount
+    except PersonAccount.DoesNotExist:
+        person_account = PersonAccount(person=person) 
+
+    if request.method == 'POST':
+        form = PersonAccountForm(request.POST)
+        if form.is_valid():
+            person.first_name = form.cleaned_data.get('first_name')
+            person.last_name = form.cleaned_data.get('last_name')
+            person.institution_id = form.cleaned_data.get('institution').id
+            person.mobinePhone = form.cleaned_data.get('mobilePhone')
+            person.phone = form.cleaned_data.get('phone')
+            person_account.password_hash = account_services.hash_password(form.cleaned_data.get('password1'))
+
+            account_services.save_account_details(participant)
+            request.session[PROCESSED_PARTICIPANT_SESSION_KEY] = email_hash
+            return HttpResponseRedirect(siteurl(request) + 'account-details/thanks')
+    else:
+        form = PersonAccountForm()
+
+    return render_to_response('userportal/account_request.html', {
+        'form': form, 'person_email': person.email })
+
+
+# Authentication for API views. Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.
 def portalAuth(request):
     user = request.user
     if not user.is_authenticated():
@@ -25,7 +58,7 @@ def portalAuth(request):
             raise PermissionDenied
     return user
 
-# List All Currently Active Allocations
+# API view List All Currently Active Allocations
 @csrf_exempt
 def listAllocationsView(request):
     user = portalAuth(request)
@@ -46,7 +79,7 @@ def listAllocationsView(request):
     else:
             raise PermissionDenied
 
-# List all users in a Project
+# API view List all users in a Project
 @csrf_exempt
 def listPeopleView(request):
     user = portalAuth(request)
@@ -67,7 +100,7 @@ def listPeopleView(request):
         raise PermissionDenied
             
 
-# Get Person details for creating account
+# API view Get Person details for creating account
 @csrf_exempt
 def userDetailView(request):
     user = portalAuth(request)
