@@ -16,7 +16,7 @@ def userDetailsRequest(request, email_hash):
     try:
         person = Person.objects.get(accountEmailHash=email_hash)
     except Person.DoesNotExist:
-        return render('userportal/invalid_hash.html', {})
+        return render(request, 'userportal/invalid_hash.html', {})
 
     try:
         person_account = person.personaccountaccount
@@ -39,7 +39,7 @@ def userDetailsRequest(request, email_hash):
     else:
         form = PersonAccountForm()
 
-    return render('userportal/account_request.html', {
+    return render(request, 'userportal/account_request.html', {
         'form': form, 'person_email': person.email })
 
 
