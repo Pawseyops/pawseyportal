@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse, Http404
-from .models import *
+from models import *
+from forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
 from django.core.exceptions import PermissionDenied
@@ -23,7 +24,7 @@ def userDetailsRequest(request, email_hash):
         return render(request, 'userportal/invalid_hash.html', {})
 
     try:
-        person_account = person.personaccountaccount
+        person_account = person.personAccount
     except PersonAccount.DoesNotExist:
         person_account = PersonAccount(person=person) 
 
@@ -44,7 +45,7 @@ def userDetailsRequest(request, email_hash):
         form = PersonAccountForm()
 
     return render(request, 'userportal/account_request.html', {
-        'form': form, 'person_email': person.email })
+        'form': form, 'person_email': person.institutionEmail })
 
 
 # Authentication for API views. Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.

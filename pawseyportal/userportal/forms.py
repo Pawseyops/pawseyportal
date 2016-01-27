@@ -14,7 +14,7 @@ class PersonAccountForm(forms.Form):
                             label='I have read and agree to the Terms of Service',
                             error_messages={'required': "You must agree to the terms to register"      })
 
-   def clean(self):
+    def clean(self):
         if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
                 raise forms.ValidationError("The two password fields didn't match.")
