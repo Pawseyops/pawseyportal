@@ -3,7 +3,7 @@
 """
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.contrib.auth import authViews
+from django.contrib.auth import views as authViews
 
 urlpatterns = [
     url(r'^portal/', include('pawseyportal.userportal.urls', namespace="portal")),
