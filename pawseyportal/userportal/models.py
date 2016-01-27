@@ -1,5 +1,6 @@
 from django.db import models
 from pawseyportal.userportal.help_text import *
+from ldap_helper import *
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
