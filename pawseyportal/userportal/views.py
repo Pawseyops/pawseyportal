@@ -10,6 +10,10 @@ import datetime
 # The API is meant to not require the csrf headers. Do no decorate any of the user facing non api views with this.
 from django.views.decorators.csrf import csrf_exempt
 
+# Index, Currently a placeholder
+def indexView(request):
+    raise Http404("No view requested")
+
 # Get user details for user creation
 def userDetailsRequest(request, email_hash):
     # Note that this relies on the hash being unique in the database, if it isn't for some reason we still want to throw the error.
