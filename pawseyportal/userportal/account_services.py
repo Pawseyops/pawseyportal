@@ -14,7 +14,7 @@ from django.template import loader, Context
 from models import EmailTemplate
 
 
-def send_account_creation_mail(person, request):
+def send_account_request_mail(person, request):
     subject = "Successful application for Pawsey Supercomputing Centre infrastructure"
     email_hash = str(uuid.uuid4())
     link = "%s%s/%s" % (settings.MYURL, 'account-request', email_hash)
