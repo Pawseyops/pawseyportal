@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^api/listAllocations/$', views.listAllocationsView, name='list_allocations'),
     url(r'^api/listPeople/$', views.listPeopleView, name='list_people'),
     url(r'^api/userDetail/$', views.userDetailView, name='user_detail'),
-    url(r'^account-request/(?P<email_hash>[\w\d\-]+)[/]$', views.userDetailsRequest, name='account-request')
+    url(r'^account-request/(?P<email_hash>[\w\d\-]+)[/]$', views.userDetailsRequest, name='account-request'),
+    url(r'^account-thanks/$', views.userDetailsThanks, name='account-thanks'),
 ]

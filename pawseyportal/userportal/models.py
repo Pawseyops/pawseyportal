@@ -50,9 +50,9 @@ class PersonAccount(models.Model):
             raise Exception('Difficulty allocating an LDAP uidNumber for ParticipantAccount=%s.'\
                 'Tried %s - %s, but they were all unavailable in ldap'%(self.id, self.id + offset, newid))
         
-        if ( (self.uid_number != newid) or (self.gid_number != newid)):
-            self.uid_number = newid
-            self.gid_number = newid
+        if ( (self.uidNumber != newid) or (self.gidNumber != newid)):
+            self.uidNumber = newid
+            self.gidNumber = newid
             self.save()
         
         return newid

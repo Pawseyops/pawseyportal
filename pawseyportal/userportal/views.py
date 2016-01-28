@@ -1,13 +1,16 @@
 from django.shortcuts import render
-from django.http import JsonResponse, Http404
+from django.http import JsonResponse, Http404, HttpResponseRedirect
 from models import *
 from forms import *
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate
+from django.conf import settings
 from django.core.exceptions import PermissionDenied
 import account_services
 
 import datetime
+
+PROCESSED_PARTICIPANT_SESSION_KEY = 'PROCESSED_PARTICIPANT'
 
 # The API is meant to not require the csrf headers. Do no decorate any of the user facing non api views with this.
 from django.views.decorators.csrf import csrf_exempt
@@ -41,13 +44,50 @@ def userDetailsRequest(request, email_hash):
 
             account_services.save_account_details(person)
             request.session[PROCESSED_PARTICIPANT_SESSION_KEY] = email_hash
-            return HttpResponseRedirect(siteurl(request) + 'account-details/thanks')
+            return HttpResponseRedirect(settings.MYURL + '/portal/account-thanks/')
     else:
         form = PersonAccountForm()
 
     return render(request, 'userportal/account_request.html', {
         'form': form, 'person_email': person.institutionEmail })
 
+# Display a summary of account details when they have submitted them
+def userDetailsThanks(request):
+    person_email_hash = None
+    try:
+        person_email_hash = request.session.get(PROCESSED_PARTICIPANT_SESSION_KEY,None)
+    except:
+        pass
+    
+    #now remove the session key if it existed
+    if person_email_hash is not None:
+        del request.session[PROCESSED_PARTICIPANT_SESSION_KEY]
+    
+    persondetails = None
+    error = None
+    if person_email_hash is None:
+        error = "Unable to retrieve person by hash: no hash provided."
+    else:
+        try:
+            person = Person.objects.get(account_email_hash = person_email_hash)
+            #erase the email hash - we don't need it anymore
+            person.account_email_hash = None
+            person.save()
+            
+            ppt_account = Person.personAccount
+            persondetails = []
+            persondetails.append( ("First Name", person.firstName) )
+            persondetails.append( ("Last Name", person.surname) )
+            persondetails.append( ("Institution Email", person.institutionEmail) )
+            persondetails.append( ("Alternative Email", person.preferredEmail) )
+            persondetails.append( ("Phone Number", person.phone) )
+            persondetails.append( ("Mobile Phone Number", person.mobilePhone) )
+            persondetails.append( ("Username (pending)", ppt_account.uid) )
+            persondetails.append( ("Institution", ppt_account.institution.name) )
+
+        except Person.DoesNotExist:
+            error = "Unable to retrieve person by hash: %s" % (str(participant_email_hash))
+    return render_to_response('userportal/account_details_thanks.html', {"persondetails": persondetails, "error":error})
 
 # Authentication for API views. Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.
 def portalAuth(request):
