@@ -1,7 +1,8 @@
 {% extends "userportal/base.html" %}
 
-{% block title %} Account Creation for Resources on Pawsey-Funded iVEC Infrastructure{% end block%}
+{% block title %} Account Creation for Resources on Pawsey-Funded iVEC Infrastructure{% endblock %}
 
+{% block content %}
 <h3>
 Thank you!
 </h3>
@@ -11,15 +12,15 @@ Thank you for completing the details required to process your account creation. 
 <h2>
 Summary
 </h2>
-% if error is not None:
-    An account summary could not be displayed: ${error}
-% else:
+{% if error %}
+    An account summary could not be displayed: {{ error }}
+{% else %}
     <div style="margin: 10px">
-    % for item in participantdetails:
-        <div style="width: 15em; font-weight:bold; float:left;">${item[0]}:</div> ${item[1]}</br>
-    % endfor
+    {% for item in persondetails %}
+        <div style="width: 15em; font-weight:bold; float:left;">{{item.0}}:</div> {{item.1}}</br>
+    {% endfor %}
     </div>    
-% endif
+{% endif %}
 
 </p>
 You will be contacted once your account has been activated. <u>Please allow several days for this process.</u>
@@ -30,4 +31,4 @@ You will be contacted once your account has been activated. <u>Please allow seve
 Should you have any queries please contact <a href="mailto:help@pawsey.org.au">help@pawsey.org.au</a>.
 </p>
 
-
+{% endblock %}

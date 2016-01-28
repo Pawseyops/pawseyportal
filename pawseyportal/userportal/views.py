@@ -69,12 +69,12 @@ def userDetailsThanks(request):
         error = "Unable to retrieve person by hash: no hash provided."
     else:
         try:
-            person = Person.objects.get(account_email_hash = person_email_hash)
+            person = Person.objects.get(accountEmailHash = person_email_hash)
             #erase the email hash - we don't need it anymore
-            person.account_email_hash = None
+            person.accountEmailHash = None
             person.save()
             
-            ppt_account = Person.personAccount
+            ppt_account = person.personAccount
             persondetails = []
             persondetails.append( ("First Name", person.firstName) )
             persondetails.append( ("Last Name", person.surname) )
@@ -83,11 +83,11 @@ def userDetailsThanks(request):
             persondetails.append( ("Phone Number", person.phone) )
             persondetails.append( ("Mobile Phone Number", person.mobilePhone) )
             persondetails.append( ("Username (pending)", ppt_account.uid) )
-            persondetails.append( ("Institution", ppt_account.institution.name) )
+            persondetails.append( ("Institution", person.institution.name) )
 
         except Person.DoesNotExist:
-            error = "Unable to retrieve person by hash: %s" % (str(participant_email_hash))
-    return render_to_response('userportal/account_details_thanks.html', {"persondetails": persondetails, "error":error})
+            error = "Unable to retrieve person by hash: %s" % (str(person_email_hash))
+    return render(request, 'userportal/account_details_thanks.html', {"persondetails": persondetails, "error":error})
 
 # Authentication for API views. Make sure we are authenticated, or if not see if we can authenticate with POST variables. This is to keep from needing cookie management in command line tools.
 def portalAuth(request):
