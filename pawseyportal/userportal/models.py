@@ -36,9 +36,9 @@ class PersonAccount(models.Model):
         '''
         offset = 21000
         maxid = 29999
-        # Make sure the new LDAP uid doesn't already exist on the Epic LDAP server
+        # Make sure the new LDAP uid doesn't already exist on the LDAP server
         # Iterate 5 times, which should be ample. If we hit the end, it might require
-        # human intervention anyway so chuck an exception.
+        # human intervention anyway so throw an exception.
         pawseyLdap = user_ldap_handler()
         for newid in range(self.id + offset, self.id + offset + 100):
             if newid > maxid:
