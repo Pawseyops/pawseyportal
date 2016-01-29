@@ -134,6 +134,8 @@ USE_TZ = True
 STATIC_URL = "%s/%s"%(MYURL,'static/')
 STATIC_ROOT = "%s/%s"%(BASE_DIR, 'static/')
 
+ADMIN_MEDIA_PREFIX = '/static/admin/'
+
 # Mail settings
 SERVER_EMAIL = 'pawseyportal@example.com'
 ADMINS = [('Administrator','admins@example.com')]

@@ -1,6 +1,7 @@
 from django.db import models
 from pawseyportal.userportal.help_text import *
 from ldap_helper import *
+from django.template import engines, Context
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
@@ -188,6 +189,16 @@ class EmailTemplate(models.Model):
     name = models.CharField(max_length=100, help_text=help_text_emailtemplate_name)
     subject = models.CharField(max_length=100, help_text=help_text_emailtemplate_subject)
     template = models.CharField(max_length=8192, blank=True, help_text=help_text_emailtemplate_template)
+
+    def render_to_string(self, template_vars):
+        django_engine = engines['django']
+        html_template = django_engine.from_string(self.template)
+        context = Context(template_vars)
+        html_body = html_template.render(context)
+        return (
+            self.subject,
+            html_body
+        )
 
     def __unicode__(self):
         return self.name

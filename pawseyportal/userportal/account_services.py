@@ -12,18 +12,20 @@ from models import *
 from django.db import transaction
 from django.template import loader, Context
 from models import EmailTemplate
+from helpers import siteurl
 
 
 def send_account_request_mail(person, request):
     subject = "Successful application for Pawsey Supercomputing Centre infrastructure"
     email_hash = str(uuid.uuid4())
-    link = "%s%s/%s" % (settings.MYURL, 'account-request', email_hash)
-    template = EmailTemplate.objects.get(name='Participant Account Request')
-    subject, message = template.render_to_string({'participant': person, 'link': link})
+    #link = "%s%s/%s" % (settings.MYURL, 'account-request', email_hash)
+    link = "%sportal/%s/%s" % (siteurl(request), 'account-request', email_hash)
+    template = EmailTemplate.objects.get(name='Person Account Request')
+    subject, message = template.render_to_string({'person': person, 'link': link})
     send_mail(subject, message, person.institutionEmail)
 
     person.accountEmailHash = email_hash
-    person.status = Participant.STATUS['EMAIL_SENT']
+    person.status_id = Person.STATUS['EMAIL_SENT']
     person.accountEmailOn = datetime.datetime.now()
     person.save()
 
@@ -39,7 +41,7 @@ def send_account_created_notification_mail(person, request):
     subject, message = template.render_to_string({'participant': person, 'project': project, 'uid': uid})
     send_mail(subject, message, person.insitutionEmail)
 
-    person.status = Participant.STATUS['ACCOUNT_CREATED_EMAIL_SENT']
+    person.status_id = Person.STATUS['ACCOUNT_CREATED_EMAIL_SENT']
     person.accountCreatedEmailOn = datetime.datetime.now()
     person.save()
 

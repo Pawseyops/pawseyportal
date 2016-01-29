@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import *
+from admin_forms import *
 import account_services
 
 class PersonProjectInline(admin.TabularInline):
@@ -65,6 +66,7 @@ class AllocationRoundAdmin(admin.ModelAdmin):
 
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'subject')
+    form = EmailTemplateForm
 
 admin.site.register(Institution, InstitutionAdmin)
 admin.site.register(Person, PersonAdmin)
