@@ -6,6 +6,7 @@ import account_services
 
 class PersonProjectInline(admin.TabularInline):
     model = Project.people.through
+    raw_id_fields = ('person',)
     extra = 3
 
 class FilesystemInline(admin.TabularInline):
