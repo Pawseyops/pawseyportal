@@ -18,6 +18,7 @@ class InstitutionAdmin(admin.ModelAdmin):
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('displayName', 'institution', 'preferredEmail') 
     actions = ['send_account_request_email', 'send_account_created_email' ]
+    exclude = ['personAccount']
 
     def send_account_request_email(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)

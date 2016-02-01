@@ -26,9 +26,9 @@ class Institution(models.Model):
         return self.name
 
 class PersonAccount(models.Model):
-    uid = models.CharField(max_length=256)
-    uidNumber = models.IntegerField()
-    gidNumber = models.IntegerField()
+    uid = models.CharField(max_length=256, null=True, blank=True)
+    uidNumber = models.IntegerField(null=True, blank=True)
+    gidNumber = models.IntegerField(null=True, blank=True)
     passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True)
 
     def constrain_uidgid(self):
@@ -82,16 +82,34 @@ class Person(models.Model):
     surname = models.CharField(max_length=32)
     institution = models.ForeignKey(Institution)
     institutionEmail = models.EmailField(max_length=64)
-    preferredEmail = models.EmailField(max_length=64)
-    phone = models.CharField(max_length=32)
-    mobilePhone = models.CharField(max_length=32, null=True)
+    preferredEmail = models.EmailField(max_length=64, null=True, blank=True)
+    phone = models.CharField(max_length=32, null=True, blank=True)
+    mobilePhone = models.CharField(max_length=32, null=True, blank=True)
     student = models.BooleanField(default = False)
-    personAccount = models.ForeignKey('PersonAccount', null=True, related_name='person')    
+    personAccount = models.ForeignKey('PersonAccount', null=True, blank=True, related_name='person')    
     accountEmailHash = models.CharField(max_length=50, null=True, blank=True)
     status = models.ForeignKey(PersonStatus, default=STATUS['NEW'])
     accountEmailOn = models.DateTimeField(null=True, blank=True)
     accountCreatedOn = models.DateTimeField(null=True, blank=True)
     accountCreatedEmailOn = models.DateTimeField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        instance = getattr(self, 'instance', None)
+        if not self.pk:
+            personAccount = PersonAccount()
+            persons = Person.objects.filter(institutionEmail=self.institutionEmail)
+            if len(persons) > 0:
+                # Existing persons with this email address
+                # Attempt to re-use existing personAccount records before
+                # creating a new empty one.
+                existing_person = persons[0]
+                if existing_person.personAccount:
+                    personAccount = existing_person.personAccount
+                else:
+                    personAccount = PersonAccount()
+            personAccount.save()
+            self.Personccount = personAccount
+        super(Person, self).save(*args, **kwargs)
 
     def displayName(self):
         return self.firstName + ' ' + self.surname
@@ -103,10 +121,10 @@ class Person(models.Model):
         return self.displayName()
 
 class Project(models.Model):
-    code = models.CharField(max_length=32)
+    code = models.CharField(max_length=32, null=True, blank=True)
     title = models.CharField(max_length=1024)
     principalInvestigator = models.ForeignKey(Person, related_name='pi')
-    summary = models.TextField()
+    summary = models.TextField(null=True, blank=True)
     people = models.ManyToManyField(Person)
 
     def __unicode__(self):

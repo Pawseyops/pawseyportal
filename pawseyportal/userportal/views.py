@@ -140,7 +140,8 @@ def listPeopleView(request):
         proj = Project.objects.get(id=projectId)
         projectPeople = proj.people.all()
         for person in projectPeople:
-            response_data[person.id]=person.personAccount.uid
+            if person.status != Person.STATUS['SUSPENDED']:
+                response_data[person.id]=person.personAccount.uid
         return JsonResponse(response_data)
     else:
         raise PermissionDenied
