@@ -5,7 +5,7 @@ from admin_forms import *
 import account_services
 
 class PersonProjectInline(admin.TabularInline):
-    model = Person
+    model = Project.people.through
     extra = 3
 
 class FilesystemInline(admin.TabularInline):
@@ -45,6 +45,8 @@ class PersonAdmin(admin.ModelAdmin):
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
 class ProjectAdmin(admin.ModelAdmin):
+    inlines = [PersonProjectInline]
+    exclude = ['people']
     list_display = ('code', 'title', 'principalInvestigator')
 
 class AllocationAdmin(admin.ModelAdmin):
