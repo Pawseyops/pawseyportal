@@ -59,7 +59,12 @@ class PersonAccount(models.Model):
         return newid
 
     def __unicode__(self):
-        return self.uid   #TODO: relate this back to the Person to get name.
+        #return self.uid   #TODO: relate this back to the Person to get name.
+        try:
+            personName = ("%s %s" % (self.person.last().firstName, self.person.last().surname))
+        except:
+            personName = "No person attached"
+        return personName
 
 class PersonStatus(models.Model):
     name = models.CharField(max_length=50)
@@ -108,7 +113,7 @@ class Person(models.Model):
                 else:
                     personAccount = PersonAccount()
             personAccount.save()
-            self.Personccount = personAccount
+            self.personAccount = personAccount
         super(Person, self).save(*args, **kwargs)
 
     def displayName(self):
