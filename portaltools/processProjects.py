@@ -236,6 +236,7 @@ def createLdapUser(user, personId):
         attrs['homeDirectory'] = ("/home/%s" % (userDict['uid'])).encode("utf8")
         attrs['userPassword'] = userDict['userPassword'].encode("utf8")
         attrs['telephoneNumber'] = userDict['telephoneNumber'].encode("utf8")
+        attrs['mobile'] = userDict.get('mobile','').encode("utf8")
 
 
         # Make the attributes dictionary into something we can throw at an ldap server
@@ -267,6 +268,8 @@ def createLdapUser(user, personId):
             exit(1)
 
         pawseyLdap.unbind_s()
+    else:
+        print ("User %s missing information so not added." , user)
 
     return
 
