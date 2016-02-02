@@ -3,10 +3,18 @@ from django.contrib import admin
 from .models import *
 from admin_forms import *
 import account_services
+import admin_widgets
 
-class PersonProjectInline(admin.TabularInline):
+class PersonProjectInline(admin_widgets.ImproveRawIdFieldsInline):
     model = Project.people.through
     raw_id_fields = ('person',)
+    readonly_fields = ['institution', 'status']
+    def status(self, instance):
+        return instance.person.status
+    status.short_description = 'Status'
+    def institution(self, instance):
+        return instance.person.institution.name
+    institution.short_description = 'Institution'
     extra = 3
 
 class FilesystemInline(admin.TabularInline):
@@ -47,8 +55,10 @@ class PersonAdmin(admin.ModelAdmin):
 
 class ProjectAdmin(admin.ModelAdmin):
     inlines = [PersonProjectInline]
-    exclude = ['people']
+    #exclude = ['people']
     list_display = ('code', 'title', 'principalInvestigator')
+    filter_horizontal = ['people']
+    form = ProjectAdminForm
 
 class AllocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'project', 'startQuarter', 'endQuarter', 'permanent')

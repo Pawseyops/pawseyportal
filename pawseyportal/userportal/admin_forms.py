@@ -10,3 +10,12 @@ class EmailTemplateForm(forms.ModelForm):
     class Meta:
         model = EmailTemplate
         fields = ['name', 'subject', 'template']
+
+class ProjectAdminForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        forms.ModelForm.__init__(self, *args, **kwargs)
+        self.fields['people'].queryset = Person.objects.distinct('institutionEmail')
+    class Meta:
+        model = Project
+        fields = ['code', 'title', 'principalInvestigator', 'summary', 'people']
+
