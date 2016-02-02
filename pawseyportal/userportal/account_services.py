@@ -75,7 +75,11 @@ def check_unique_uid(uid):
         return False
 
 def suggest_uid(person):
-    potential = ('%s%s' % (person.firstName, person.surname))
+    first = person.firstName.lower()
+    last = person.surname.lower()
+    first = "".join(x for x in first if x in 'abcdefghijklmnopqrstuvwxyz'])
+    last = "".join(x for x in last if x in 'abcdefghijklmnopqrstuvwxyz'])
+    potential = ('%s%s' % (first[0], last))
     if check_unique_uid(potential):
         return potential
     ext = 1
