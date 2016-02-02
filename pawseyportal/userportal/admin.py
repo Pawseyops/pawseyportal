@@ -4,6 +4,8 @@ from .models import *
 from admin_forms import *
 import account_services
 import admin_widgets
+from ajax_select.admin import *
+
 
 class PersonProjectInline(admin_widgets.ImproveRawIdFieldsInline):
     model = Project.people.through
@@ -53,7 +55,7 @@ class PersonAdmin(admin.ModelAdmin):
 
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(AjaxSelectAdmin):
     inlines = [PersonProjectInline]
     #exclude = ['people']
     list_display = ('code', 'title', 'principalInvestigator')

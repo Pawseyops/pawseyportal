@@ -73,3 +73,16 @@ def check_unique_uid(uid):
         return True
     else:
         return False
+
+def suggest_uid(person):
+    potential = ('%s%s' % (person.firstName, person.surname))
+    if check_unique_uid(potential):
+        return potential
+    ext = 1
+    while 1:
+        if check_unique_uid(potential + str(ext)):
+            return potential + str(ext)
+        ext = ext + 1
+    
+    # if we ever get here we are all doomed
+    return ''

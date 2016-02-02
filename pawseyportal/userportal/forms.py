@@ -8,6 +8,7 @@ class PersonAccountForm(forms.Form):
     institution = forms.ModelChoiceField(queryset=models.Institution.objects.all()) 
     phone = forms.CharField(max_length=256, label='Phone number', required=False)
     mobilePhone = forms.CharField(max_length=256, label='Mobile Phone number (useful for password resets)', required=False)
+    uid = forms.CharField(max_length=50, label='Desired username for logging on to Pawsey systems')
     password1 = forms.CharField(widget=forms.PasswordInput(render_value=False), label='Desired password')
     password2 = forms.CharField(widget=forms.PasswordInput(render_value=False), label='Password (again)')
 

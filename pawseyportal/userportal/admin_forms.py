@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from models import *
 from datetime import datetime
+from ajax_select.fields import AutoCompleteSelectField, AutoCompleteSelectMultipleField
+from ajax_select import make_ajax_field
 
 class EmailTemplateForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -18,4 +20,4 @@ class ProjectAdminForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['code', 'title', 'principalInvestigator', 'summary', 'people']
-
+    people = make_ajax_field(Project, 'people', 'person', )
