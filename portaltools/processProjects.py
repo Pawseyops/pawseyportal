@@ -381,7 +381,7 @@ def getProjectUsers(allocation):
 
 # Activate accounts on a system (in the future also trigger emails for creation if necessary)
 def activateAccount(user, allocation, personId):
-    if user == '':
+    if user == '' or user == None:
         print "Username is empty, no point in continuing with this one"
         return
 
