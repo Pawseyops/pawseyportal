@@ -1,11 +1,11 @@
 from django import forms
-from pawseyportal.userportal import models
+from pawseyportal.userportal.models import *
 import account_services
 
 class PersonAccountForm(forms.Form):
     firstName = forms.CharField(max_length=256 )
     lastName = forms.CharField(max_length=256)
-    institution = forms.ModelChoiceField(queryset=models.Institution.objects.all()) 
+    institution = forms.ModelChoiceField(queryset=Institution.objects.all()) 
     phone = forms.CharField(max_length=256, label='Phone number', required=False)
     mobilePhone = forms.CharField(max_length=256, label='Mobile Phone number (useful for password resets)', required=False)
     uid = forms.CharField(max_length=50, label='Desired username for logging on to Pawsey systems')
@@ -21,6 +21,6 @@ class PersonAccountForm(forms.Form):
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
                 raise forms.ValidationError("The two password fields didn't match.")
         if 'uid' in self.cleaned_data:
-            if not account_services.check_unique_uid(self.cleaned_data['uid'], self.instance):
+            if not account_services.check_unique_uid(self.cleaned_data['uid'], ):
                 raise forms.ValidationError("The uid you requested is already taken")
         return self.cleaned_data 

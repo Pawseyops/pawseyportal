@@ -12,6 +12,7 @@ source /var/www/pythonapps/pawseyportal/$VERSION/virtualenv/bin/activate
 pip install django==1.9.1
 pip install django_auth_ldap
 pip install django_ajax_selects
+pip install commonware
 
 cd /var/www/pythonapps/pawseyportal/$VERSION
 python manage.py collectstatic --noinput

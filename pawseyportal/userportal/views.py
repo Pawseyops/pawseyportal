@@ -33,7 +33,7 @@ def userDetailsRequest(request, email_hash):
         person_account = PersonAccount(person=person) 
 
     if request.method == 'POST':
-        form = PersonAccountForm(request.POST)
+        form = PersonAccountForm(request.POST, person)
         if form.is_valid():
             person.firstName = form.cleaned_data.get('firstName')
             person.surname = form.cleaned_data.get('lastName')
