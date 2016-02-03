@@ -61,14 +61,14 @@ def save_account_details(person):
      
     person.save()
 
-def check_unique_uid(uid):
+def check_unique_uid(uid, person = Person.objects.first()):
     if uid is None or len(uid) == 0:
         return False
     qs = PersonAccount.objects.filter(uid = uid)
     if len(qs) == 0:
         #There were none. OK!
         return True
-    elif (len(qs) == 1) and qs[0].id == self.id:
+    elif (len(qs) == 1) and qs[0].id == person.personAccount.id:
         #There was one, but it was me.
         return True
     else:
@@ -84,7 +84,7 @@ def suggest_uid(person):
         return potential
     ext = 1
     while 1:
-        if check_unique_uid(potential + str(ext)):
+        if check_unique_uid(potential + str(ext), person):
             return potential + str(ext)
         ext = ext + 1
     
