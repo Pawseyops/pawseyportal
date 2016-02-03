@@ -2,6 +2,7 @@ from django.db import models
 from pawseyportal.userportal.help_text import *
 from ldap_helper import *
 from django.template import engines, Context
+from datetime import date
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
@@ -132,6 +133,11 @@ class Project(models.Model):
     summary = models.TextField(null=True, blank=True)
     people = models.ManyToManyField(Person)
 
+    def activeAllocations(self):
+        today = date.today()
+        allocations = self.allocation_set.filter(start__lte=date.today()).filter(end__gte=date.today()).exclude(suspend='True')
+        return allocations
+
     def __unicode__(self):
         return self.title
 
@@ -189,6 +195,12 @@ class Allocation(models.Model):
 
     def endYear(self):
         return self.end.year
+
+    def active(self):
+        today = date.today()
+        if today >= self.start and today <=self.end:
+            return true
+        return false
 
     def __unicode__(self):
         return self.name

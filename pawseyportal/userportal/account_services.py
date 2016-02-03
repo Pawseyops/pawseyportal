@@ -32,13 +32,19 @@ def send_account_request_mail(person, request):
 def send_account_created_notification_mail(person, request):
     subject = "Account created for Pawsey Supercomputing Centre infrastructure"
     uid = person.personAccount.uid
-    project = person.projectList().last().code
+    projects = person.projectList().all()
+    for project in projects:
+        allocations = project.activeAllocations()
+        template = EmailTemplate.objects.get(name='Person Account Created')
+        subject, message = template.render_to_string({'person': person, 'project': project, 'uid': uid, 'allocations': allocations})
+        send_mail(subject, message, person.institutionEmail)
+
     #hours_allocated = person.allocation.serviceunits
     #assert project is not None and len(project)>0, "Project could not be retrieved at time of 'account created' email for user %s" % (uid) 
     #assert (hours_allocated is not None) and (hours_allocated > 0), "Invalid hours allocated (%s) at time of 'account created' email" % (str(hours_allocated) )
-    template = EmailTemplate.objects.get(name='Person Account Created')
-    subject, message = template.render_to_string({'person': person, 'project': project, 'uid': uid})
-    send_mail(subject, message, person.institutionEmail)
+    #template = EmailTemplate.objects.get(name='Person Account Created')
+    #subject, message = template.render_to_string({'person': person, 'project': project, 'uid': uid})
+    #send_mail(subject, message, person.institutionEmail)
 
     person.status_id = Person.STATUS['ACCOUNT_CREATED_EMAIL_SENT']
     person.accountCreatedEmailOn = datetime.datetime.now()
