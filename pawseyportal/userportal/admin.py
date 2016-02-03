@@ -31,6 +31,7 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
     exclude = ['personAccount']
+    search_fields = ['^firstName', '^surname'] 
 
     def send_account_request_email(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
