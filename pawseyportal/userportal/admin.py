@@ -25,6 +25,7 @@ class FilesystemInline(admin.TabularInline):
 
 class InstitutionAdmin(admin.ModelAdmin):
     list_display = ('name', 'partner')
+    search_fields = ['^name']
 
 class PersonAdmin(admin.ModelAdmin):
     list_display = ('displayName', 'institution', 'preferredEmail', 'status') 
@@ -63,10 +64,12 @@ class ProjectAdmin(AjaxSelectAdmin):
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']
     form = ProjectAdminForm
+    search_fields = ['^code', '^title']
 
 class AllocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'project', 'startQuarter', 'endQuarter', 'permanent')
     list_filter = ['start','end']
+    search_fields = ['^name', '^project__code']
 
     inlines = [FilesystemInline]
 
