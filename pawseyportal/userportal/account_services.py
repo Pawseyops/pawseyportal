@@ -67,6 +67,12 @@ def save_account_details(person):
      
     person.save()
 
+    template = EmailTemplate.objects.get(name='Details Filled In')
+    subject, message = template.render_to_string({'person': person})
+    send_mail(subject, message, 'help@pawsey.org.au')
+
+    return
+
 def check_unique_uid(uid, person = Person.objects.first()):
     if uid is None or len(uid) == 0:
         return False
