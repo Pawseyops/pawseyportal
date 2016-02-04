@@ -13,7 +13,7 @@ class PersonAccountForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput(render_value=False), label='Password (again)')
 
     tos = forms.BooleanField(widget=forms.CheckboxInput(),
-                            label='I have read and agree to the Terms of Service',
+                            label='I have read and agree to the Conditions of Use',
                             error_messages={'required': "You must agree to the terms to register"      })
 
     def clean(self):
