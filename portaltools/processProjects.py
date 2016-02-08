@@ -202,6 +202,10 @@ def createLdapProject(projectCode, projectId, priorityArea, service = ''):
         print e
         exit(1)
 
+    projectList.append(projectCode)
+
+    return 0
+
 
 # Create user in LDAP
 def createLdapUser(user, personId):
@@ -236,7 +240,7 @@ def createLdapUser(user, personId):
         attrs['homeDirectory'] = ("/home/%s" % (userDict['uid'])).encode("utf8")
         attrs['userPassword'] = userDict['userPassword'].encode("utf8")
         attrs['telephoneNumber'] = userDict['telephoneNumber'].encode("utf8")
-        attrs['mobile'] = userDict.get('mobile','').encode("utf8")
+        attrs['mobile'] = userDict.get('mobile',' ').encode("utf8")
 
 
         # Make the attributes dictionary into something we can throw at an ldap server
@@ -391,6 +395,7 @@ def activateAccount(user, allocation, personId):
     if not (ldapExistanceCheck(user)):
         print ("User %s doesn't exist in ldap, attempting to create" % (user))
         createLdapUser(user, personId)
+        userList.append(user)
         
     # Add user to Allocation in ldap if they aren't already
     if not (ldapAllocationCheck(user,allocation)):
@@ -452,6 +457,9 @@ for opt, arg in opts:
         usage()
         sys.exit(0)
 
+projectList = []
+userList = []
+
 # Get the current allocations for this system
 allocations = getAllocations(system, authParams)
 
@@ -481,3 +489,10 @@ for allocation in allocations:
         for user in users:
             activateAccount(users[user], allocations[allocation], user) # That last argument is the Person.id. You'll be glad you had it later.
 
+
+print "Finished."
+print ("Summary: Activated %s projects and %s accounts" % ( len(projectList), len(userList) ))
+print ("List of Projects Activated")
+print ("\n".join(projectList))
+print ("List of Users Activated")
+print ("\n".join(userList))
