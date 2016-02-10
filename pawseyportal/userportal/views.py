@@ -38,7 +38,7 @@ def userDetailsRequest(request, email_hash):
             person.firstName = form.cleaned_data.get('firstName')
             person.surname = form.cleaned_data.get('lastName')
             person.institution_id = form.cleaned_data.get('institution').id
-            person.mobinePhone = form.cleaned_data.get('mobilePhone')
+            person.mobilePhone = form.cleaned_data.get('mobilePhone')
             person.phone = form.cleaned_data.get('phone')
             person_account.passwordHash = account_services.hash_password(form.cleaned_data.get('password1'))
             person_account.uid = form.cleaned_data.get('uid')
@@ -47,7 +47,7 @@ def userDetailsRequest(request, email_hash):
             request.session[PROCESSED_PARTICIPANT_SESSION_KEY] = email_hash
             return HttpResponseRedirect(settings.MYURL + '/portal/account-thanks/')
     else:
-        form = PersonAccountForm(initial = {'firstName': person.firstName, 'lastName': person.surname, 'uid': account_services.suggest_uid(person) })
+        form = PersonAccountForm(initial = {'firstName': person.firstName, 'lastName': person.surname, 'uid': account_services.suggest_uid(person), 'phone': person.phone, 'mobilePhone': person.mobilePhone, 'institution': person.institution_id })
 
     return render(request, 'userportal/account_request.html', {
         'form': form, 'person_email': person.institutionEmail })
