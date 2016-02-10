@@ -84,20 +84,20 @@ class Person(models.Model):
         'SUSPENDED': 6,
     }
 
-    firstName = models.CharField(max_length=32)
+    firstName = models.CharField(max_length=32, verbose_name='First Name')
     surname = models.CharField(max_length=32)
     institution = models.ForeignKey(Institution)
-    institutionEmail = models.EmailField(max_length=64)
-    preferredEmail = models.EmailField(max_length=64, null=True, blank=True)
+    institutionEmail = models.EmailField(max_length=64, verbose_name='Institution Email')
+    preferredEmail = models.EmailField(max_length=64, null=True, blank=True, verbose_name='Alternative Email')
     phone = models.CharField(max_length=32, null=True, blank=True)
-    mobilePhone = models.CharField(max_length=32, null=True, blank=True)
+    mobilePhone = models.CharField(max_length=32, null=True, blank=True, verbose_name='Mobile Phone')
     student = models.BooleanField(default = False)
     personAccount = models.ForeignKey('PersonAccount', null=True, blank=True, related_name='person')    
-    accountEmailHash = models.CharField(max_length=50, null=True, blank=True)
+    accountEmailHash = models.CharField(max_length=50, null=True, blank=True, verbose_name='Account Email Hash')
     status = models.ForeignKey(PersonStatus, default=STATUS['NEW'])
-    accountEmailOn = models.DateTimeField(null=True, blank=True)
-    accountCreatedOn = models.DateTimeField(null=True, blank=True)
-    accountCreatedEmailOn = models.DateTimeField(null=True, blank=True)
+    accountEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Creation Email On')
+    accountCreatedOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created On')
+    accountCreatedEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created Email On')
 
     def save(self, *args, **kwargs):
         instance = getattr(self, 'instance', None)

@@ -31,7 +31,8 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ('displayName', 'institution', 'preferredEmail', 'status') 
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
-    exclude = ['personAccount']
+    exclude = ['personAccount', 'accountEmailHash' ]
+    readonly_fields = ['accountEmailOn', 'accountCreatedOn', 'accountCreatedEmailOn']
     search_fields = ['^firstName', '^surname'] 
 
     def send_account_request_email(self, request, queryset):
@@ -59,8 +60,9 @@ class PersonAdmin(admin.ModelAdmin):
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
 class ProjectAdmin(AjaxSelectAdmin):
-    inlines = [PersonProjectInline]
+    #inlines = [PersonProjectInline]
     #exclude = ['people']
+
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']
     form = ProjectAdminForm
