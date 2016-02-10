@@ -32,7 +32,7 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
     exclude = ['personAccount', 'accountEmailHash' ]
-    readonly_fields = ['accountEmailOn', 'accountCreatedOn', 'accountCreatedEmailOn']
+    readonly_fields = ['status', 'accountEmailOn', 'accountCreatedOn', 'accountCreatedEmailOn']
     search_fields = ['^firstName', '^surname'] 
 
     def send_account_request_email(self, request, queryset):
