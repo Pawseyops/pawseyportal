@@ -23,6 +23,13 @@ class FilesystemInline(admin.TabularInline):
     model = AllocationFilesystem
     extra = 2
 
+class AllocationInline(admin.TabularInline):
+    model = Allocation
+    extra = 0
+    show_change_link = True
+    can_delete = False
+    readonly_fields = ['permanent', 'priorityArea', 'serviceunits']
+
 class InstitutionAdmin(admin.ModelAdmin):
     list_display = ('name', 'partner')
     search_fields = ['^name']
@@ -60,8 +67,7 @@ class PersonAdmin(admin.ModelAdmin):
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
 class ProjectAdmin(AjaxSelectAdmin):
-    #inlines = [PersonProjectInline]
-    #exclude = ['people']
+    inlines = [AllocationInline]
 
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']

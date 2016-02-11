@@ -129,7 +129,7 @@ class Person(models.Model):
 class Project(models.Model):
     code = models.CharField(max_length=32, null=True, blank=True)
     title = models.CharField(max_length=1024)
-    principalInvestigator = models.ForeignKey(Person, related_name='pi')
+    principalInvestigator = models.ForeignKey(Person, related_name='pi', verbose_name='Principal Investigator')
     summary = models.TextField(null=True, blank=True)
     people = models.ManyToManyField(Person)
 
@@ -142,8 +142,8 @@ class Project(models.Model):
         return self.title
 
 class PriorityArea(models.Model):
-    name = models.CharField(max_length=256)
-    code = models.CharField(max_length=256)
+    name = models.CharField(max_length = 256)
+    code = models.CharField(max_length = 256)
 
     def __unicode__(self):
         return self.name
@@ -152,7 +152,7 @@ class AllocationRound(models.Model):
         system = models.ForeignKey(Service)
         start_date = models.DateField()
         end_date = models.DateField()
-        name = models.CharField(max_length=512, null=True, blank=True)
+        name = models.CharField(max_length = 512, null = True, blank = True)
         priority_area = models.ManyToManyField(PriorityArea)
 
         def status(self):
@@ -178,8 +178,8 @@ class Allocation(models.Model):
     start = models.DateField()
     end = models.DateField()
     permanent = models.BooleanField(default = False)
-    priorityArea = models.ForeignKey(PriorityArea)
-    serviceunits = models.IntegerField()
+    priorityArea = models.ForeignKey(PriorityArea, verbose_name = 'Priority Area', null = True, blank = True)
+    serviceunits = models.IntegerField(null = True, blank = True)
     service = models.ForeignKey(Service)
     suspend = models.BooleanField(default = False)
     allocation_round = models.ForeignKey(AllocationRound)
