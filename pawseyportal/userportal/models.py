@@ -1,5 +1,5 @@
 from django.db import models
-from pawseyportal.userportal.help_text import *
+import pawseyportal.userportal.help_text as help_text
 from ldap_helper import *
 from django.template import engines, Context
 from datetime import date
@@ -221,9 +221,9 @@ class AllocationFilesystem(models.Model):
         return self.filesystem.name
 
 class EmailTemplate(models.Model):
-    name = models.CharField(max_length=100, help_text=help_text_emailtemplate_name)
-    subject = models.CharField(max_length=100, help_text=help_text_emailtemplate_subject)
-    template = models.CharField(max_length=8192, blank=True, help_text=help_text_emailtemplate_template)
+    name = models.CharField(max_length=100, help_text=help_text.emailtemplate_name)
+    subject = models.CharField(max_length=100, help_text=help_text.emailtemplate_subject)
+    template = models.CharField(max_length=8192, blank=True, help_text=help_text.emailtemplate_template)
 
     def render_to_string(self, template_vars):
         django_engine = engines['django']
