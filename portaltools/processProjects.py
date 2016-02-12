@@ -228,19 +228,20 @@ def createLdapUser(user, personId):
         dn = ("uid=%s,ou=%s,ou=People,%s" % (userDict["uid"], userDict["institution"], ldapBaseDN))
         # Attributes for the new entry
         attrs = {}
-        attrs['objectclass'] = ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount', 'inetUser']
+        attrs['objectclass'] = ['top', 'inetOrgPerson', 'organizationalPerson', 'person', 'posixAccount', 'inetUser', 'mailRecipient']
         attrs['cn'] = ("%s %s" % (userDict['givenName'], userDict['sn'])).encode("utf8")
-        attrs['givenName'] = userDict['givenName'].encode("utf8")
-        attrs['sn'] = userDict['sn'].encode("utf8")
-        attrs['uid'] = userDict['uid'].encode("utf8")
+        attrs['givenName'] = str(userDict['givenName']).encode("utf8")
+        attrs['sn'] = str(userDict.get('sn', ' ')).encode("utf8")
+        attrs['uid'] = str(userDict['uid']).encode("utf8")
         attrs['uidNumber'] = str(userDict['uidNumber'])
         attrs['gidNumber'] = str(userDict['gidNumber'])
         attrs['loginShell'] = '/bin/bash'
-        attrs['mail'] = userDict['mail'].encode("utf8")
+        attrs['mail'] = str(userDict['mail']).encode("utf8")
+        attrs['mailAlternateAddress'] = str(userDict.get('mailAlternateAddress',' ')).encode("utf8")
         attrs['homeDirectory'] = ("/home/%s" % (userDict['uid'])).encode("utf8")
         attrs['userPassword'] = userDict['userPassword'].encode("utf8")
-        attrs['telephoneNumber'] = userDict['telephoneNumber'].encode("utf8")
-        attrs['mobile'] = userDict.get('mobile',' ').encode("utf8")
+        attrs['telephoneNumber'] = str(userDict.get('telephoneNumber', ' ')).encode("utf8")
+        attrs['mobile'] = str(userDict.get('mobile',' ')).encode("utf8")
 
 
         # Make the attributes dictionary into something we can throw at an ldap server
@@ -254,6 +255,7 @@ def createLdapUser(user, personId):
             exit(1)
 
         # Now create their group
+        print "Now attempting to create their POSIX account"
         dn = ("cn=%s,ou=POSIX,ou=Groups,%s" % (userDict["uid"], ldapBaseDN))
         # Attributes for the new entry
         attrs = {}
@@ -269,7 +271,7 @@ def createLdapUser(user, personId):
             pawseyLdap.add_s(dn,ldif)
         except ldap.LDAPError, e:
             print e
-            exit(1)
+            #exit(1)
 
         pawseyLdap.unbind_s()
     else:

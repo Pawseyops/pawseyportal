@@ -167,6 +167,7 @@ def userDetailView(request):
         response_data['uidNumber'] = person.personAccount.uidNumber
         response_data['gidNumber'] = person.personAccount.gidNumber
         response_data['mail'] = person.institutionEmail
+        response_data['mailAlternateAddress'] = person.preferredEmail
         response_data['userPassword'] = person.personAccount.passwordHash
         response_data['telephoneNumber'] = person.phone
         response_data['mobile'] = person.mobilePhone
