@@ -6,31 +6,31 @@ from datetime import date
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
-    name = models.CharField(max_length=256)
-    helpEmail = models.EmailField(max_length=254)
+    name = models.CharField(max_length=256, help_text = help_text.servicetype_name)
+    helpEmail = models.EmailField(max_length=254, help_text = help_text.servicetype_help_email)
 
     def __unicode__(self):
         return self.name
 
 class Service(models.Model):
-    name = models.CharField(max_length=256)
-    type = models.ForeignKey(ServiceType)
+    name = models.CharField(max_length=256, help_text = help_text.service_name)
+    type = models.ForeignKey(ServiceType, help_text = help_text.service_type)
 
     def __unicode__(self):
         return self.name
 
 class Institution(models.Model):
-    name = models.CharField(max_length=256)
-    partner = models.BooleanField(default = False)
+    name = models.CharField(max_length=256, help_text = help_text.institution_name)
+    partner = models.BooleanField(default = False, help_text = help_text.institution_partner)
 
     def __unicode__(self):
         return self.name
 
 class PersonAccount(models.Model):
-    uid = models.CharField(max_length=256, null=True, blank=True)
-    uidNumber = models.IntegerField(null=True, blank=True)
-    gidNumber = models.IntegerField(null=True, blank=True)
-    passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True)
+    uid = models.CharField(max_length=256, null=True, blank=True, help_text = help_text.personaccount_uid)
+    uidNumber = models.IntegerField(null=True, blank=True, help_text = help_text.personaccount_uidnumber)
+    gidNumber = models.IntegerField(null=True, blank=True, help_text = help_text.personaccount_gidnumber)
+    passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True, help_text = help_text.personaccount_passwordhash)
 
     def constrain_uidgid(self):
         '''Ensures the users uidnumber and gidnumber are over 20k, and unique in the database.
@@ -68,8 +68,8 @@ class PersonAccount(models.Model):
         return personName
 
 class PersonStatus(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=256, null=True, blank=True)
+    name = models.CharField(max_length=50, help_text = help_text.personstatus_name)
+    description = models.CharField(max_length=256, null=True, blank=True, help_text = help_text.personstatus_description)
 
     def __unicode__(self):
         return "%s" % self.name
@@ -84,20 +84,20 @@ class Person(models.Model):
         'SUSPENDED': 6,
     }
 
-    firstName = models.CharField(max_length=32, verbose_name='First Name')
-    surname = models.CharField(max_length=32)
-    institution = models.ForeignKey(Institution)
-    institutionEmail = models.EmailField(max_length=64, verbose_name='Institution Email')
-    preferredEmail = models.EmailField(max_length=64, null=True, blank=True, verbose_name='Alternative Email')
-    phone = models.CharField(max_length=32, null=True, blank=True)
-    mobilePhone = models.CharField(max_length=32, null=True, blank=True, verbose_name='Mobile Phone')
-    student = models.BooleanField(default = False)
-    personAccount = models.ForeignKey('PersonAccount', null=True, blank=True, related_name='person')    
-    accountEmailHash = models.CharField(max_length=50, null=True, blank=True, verbose_name='Account Email Hash')
-    status = models.ForeignKey(PersonStatus, default=STATUS['NEW'])
-    accountEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Creation Email On')
-    accountCreatedOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created On')
-    accountCreatedEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created Email On')
+    firstName = models.CharField(max_length=32, verbose_name='First Name', help_text = help_text.person_firstname)
+    surname = models.CharField(max_length=32, help_text = help_text.person_surname)
+    institution = models.ForeignKey(Institution, help_text = help_text.person_institution)
+    institutionEmail = models.EmailField(max_length=64, verbose_name='Institution Email', help_text = help_text.person_institution_email)
+    preferredEmail = models.EmailField(max_length=64, null=True, blank=True, verbose_name='Alternative Email', help_text = help_text.person_alternate_email)
+    phone = models.CharField(max_length=32, null=True, blank=True, help_text = help_text.person_phone)
+    mobilePhone = models.CharField(max_length=32, null=True, blank=True, verbose_name='Mobile Phone', help_text = help_text.person_mobilephone)
+    student = models.BooleanField(default = False, help_text = help_text.person_student)
+    personAccount = models.ForeignKey('PersonAccount', null=True, blank=True, related_name='person', help_text = help_text.person_personaccount)    
+    accountEmailHash = models.CharField(max_length=50, null=True, blank=True, verbose_name='Account Email Hash', help_text = help_text.person_accountemailhash)
+    status = models.ForeignKey(PersonStatus, default=STATUS['NEW'], help_text = help_text.person_status)
+    accountEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Creation Email On', help_text = help_text.person_accountemailon)
+    accountCreatedOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created On', help_text = help_text.person_accountcreatedon)
+    accountCreatedEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created Email On', help_text = help_text.person_accountcreatedemailon)
 
     def save(self, *args, **kwargs):
         instance = getattr(self, 'instance', None)
@@ -127,11 +127,11 @@ class Person(models.Model):
         return self.displayName()
 
 class Project(models.Model):
-    code = models.CharField(max_length=32, null=True, blank=True)
-    title = models.CharField(max_length=1024)
-    principalInvestigator = models.ForeignKey(Person, related_name='pi', verbose_name='Principal Investigator')
-    summary = models.TextField(null=True, blank=True)
-    people = models.ManyToManyField(Person)
+    code = models.CharField(max_length=32, null=True, blank=True, help_text = help_text.project_code)
+    title = models.CharField(max_length=1024, help_text = help_text.project_title)
+    principalInvestigator = models.ForeignKey(Person, related_name='pi', verbose_name='Principal Investigator', help_text = help_text.project_pi)
+    summary = models.TextField(null=True, blank=True, help_text = help_text.project_summary)
+    people = models.ManyToManyField(Person, help_text = help_text.project_people)
 
     def activeAllocations(self):
         today = date.today()
@@ -142,18 +142,18 @@ class Project(models.Model):
         return self.title
 
 class PriorityArea(models.Model):
-    name = models.CharField(max_length = 256)
-    code = models.CharField(max_length = 256)
+    name = models.CharField(max_length = 256, help_text = help_text.priorityarea_name)
+    code = models.CharField(max_length = 256, help_text = help_text.priorityarea_code)
 
     def __unicode__(self):
         return self.name
 
 class AllocationRound(models.Model):
-        system = models.ForeignKey(Service)
-        start_date = models.DateField()
-        end_date = models.DateField()
-        name = models.CharField(max_length = 512, null = True, blank = True)
-        priority_area = models.ManyToManyField(PriorityArea)
+        system = models.ForeignKey(Service, help_text = help_text.allocationround_system)
+        start_date = models.DateField(help_text = help_text.allocationround_start_date)
+        end_date = models.DateField(help_text = help_text.allocationround_end_date)
+        name = models.CharField(max_length = 512, null = True, blank = True, help_text = help_text.allocationround_name)
+        priority_area = models.ManyToManyField(PriorityArea, help_text = help_text.allocationround_priority_area)
 
         def status(self):
             today = date.today()
@@ -173,16 +173,16 @@ class AllocationRound(models.Model):
                     self.end_date.strftime('%d %b %Y'))
 
 class Allocation(models.Model):
-    name = models.CharField(max_length=256)
-    project = models.ForeignKey(Project)
-    start = models.DateField()
-    end = models.DateField()
-    permanent = models.BooleanField(default = False)
-    priorityArea = models.ForeignKey(PriorityArea, verbose_name = 'Priority Area', null = True, blank = True)
-    serviceunits = models.IntegerField(null = True, blank = True)
-    service = models.ForeignKey(Service)
-    suspend = models.BooleanField(default = False)
-    allocation_round = models.ForeignKey(AllocationRound)
+    name = models.CharField(max_length=256, help_text = help_text.allocation_name)
+    project = models.ForeignKey(Project, help_text = help_text.allocation_project)
+    start = models.DateField(help_text = help_text.allocation_start)
+    end = models.DateField(help_text = help_text.allocation_end)
+    permanent = models.BooleanField(default = False, help_text = help_text.allocation_permanent)
+    priorityArea = models.ForeignKey(PriorityArea, verbose_name = 'Priority Area', null = True, blank = True, help_text = help_text.allocation_priorityarea)
+    serviceunits = models.IntegerField(null = True, blank = True, help_text = help_text.allocation_serviceunits)
+    service = models.ForeignKey(Service, help_text = help_text.allocation_service)
+    suspend = models.BooleanField(default = False, help_text = help_text.allocation_suspend)
+    allocation_round = models.ForeignKey(AllocationRound, help_text = help_text.allocation_allocation_round)
 
     def startQuarter(self):
         return str(self.start.year) + 'Q' + str((self.start.month-1)//3 + 1)
@@ -206,16 +206,16 @@ class Allocation(models.Model):
         return self.name
 
 class Filesystem(models.Model):
-    name = models.CharField(max_length=32)
-    quotad = models.BooleanField(default = False)
+    name = models.CharField(max_length=32, help_text = help_text.filesystem_name)
+    quotad = models.BooleanField(default = False, help_text = help_text.filesystem_quotad)
 
     def __unicode__(self):
         return self.name
 
 class AllocationFilesystem(models.Model):
-    filesystem = models.ForeignKey(Filesystem)
-    allocation = models.ForeignKey(Allocation)
-    quota = models.IntegerField(default = 0)
+    filesystem = models.ForeignKey(Filesystem, help_text = help_text.allocationfilesystem_filesystem)
+    allocation = models.ForeignKey(Allocation, help_text = help_text.allocationfilesystem_allocation)
+    quota = models.IntegerField(default = 0, help_text = help_text.allocationfilesystem_quota)
 
     def __unicode__(self):
         return self.filesystem.name
