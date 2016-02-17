@@ -82,3 +82,5 @@ allocationfilesystem_filesystem = """Filesystem that this applies to"""
 allocationfilesystem_allocation = """Allocation this applies to"""
 allocationfilesystem_quota = "Quota of this allocation on this filesystem"""
 
+# Comment Model
+comment_comment = """Internal Comment about the Project or Allocation"""

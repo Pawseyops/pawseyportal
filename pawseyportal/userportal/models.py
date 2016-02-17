@@ -3,6 +3,7 @@ import pawseyportal.userportal.help_text as help_text
 from ldap_helper import *
 from django.template import engines, Context
 from datetime import date
+from django.contrib.auth.models import User
 
 # Models for Projects, people, accounts.
 class ServiceType(models.Model):
@@ -237,3 +238,9 @@ class EmailTemplate(models.Model):
 
     def __unicode__(self):
         return self.name
+
+class Comment(models.Model):
+    comment =  models.TextField(null = True, blank = True, help_text = help_text.comment_comment)
+    allocation = models.ForeignKey(Allocation, related_name = "allocation", null = True, blank = True)
+    project = models.ForeignKey(Project, related_name = "project", null = True, blank = True)
+    user = models.ForeignKey(User, related_name = "user", null = True, blank = True)
