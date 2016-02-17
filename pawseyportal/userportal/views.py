@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 import account_services
+from helpers import api_ip_authorisation
 
 import datetime
 
@@ -105,8 +106,9 @@ def portalAuth(request):
             raise PermissionDenied
     return user
 
-# API view List All Currently Active Allocations
+# Api view. List All Currently Active Allocations
 @csrf_exempt
+@api_ip_authorisation
 def listAllocationsView(request):
     user = portalAuth(request)
     if user.is_active and user.is_superuser:
@@ -126,8 +128,9 @@ def listAllocationsView(request):
     else:
             raise PermissionDenied
 
-# API view List all users in a Project
+# Api view. List all users in a Project
 @csrf_exempt
+@api_ip_authorisation
 def listPeopleView(request):
     user = portalAuth(request)
 
@@ -148,8 +151,9 @@ def listPeopleView(request):
         raise PermissionDenied
             
 
-# API view Get Person details for creating account
+# Api view. Get Person details for creating account
 @csrf_exempt
+@api_ip_authorisation
 def userDetailView(request):
     user = portalAuth(request)
     if 'person' not in request.POST:
@@ -177,3 +181,25 @@ def userDetailView(request):
     else:
         raise PermissionDenied
     
+# API view. Confirm account created and set Person status
+@csrf_exempt
+@api_ip_authorisation
+def accountCreatedView(request):
+    user = portalAuth(request)
+    if 'person' not in request.POST:
+        raise Http404("No person requested")
+    else:    
+        personId = request.POST["person"]
+    
+    if user.is_active and user.is_superuser:
+        person = Person.objects.get(id = personId)
+        if person.status_id < Person.STATUS['ACCOUNT_CREATED']:
+            person.status_id = Person.STATUS['ACCOUNT_CREATED']
+        person.accountCreatedOn = datetime.datetime.now()
+        person.save()
+
+        response_data['success'] = 1
+
+        return JsonResponse(response_data)
+    else:
+        raise PermissionDenied

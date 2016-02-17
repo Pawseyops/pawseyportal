@@ -148,6 +148,7 @@ EMAIL_SUBJECT_PREFIX = '[PawseyPortal] '
 # Security settings
 #SESSION_COOKIE_SECURE = True
 #CSRF_COOKIE_SECURE = True
+API_AUTHORISED_IPS = []
 
 # Try to find a custom settings file (rather than changing this one)
 

@@ -352,6 +352,24 @@ def getAllocations(system, authParams):
 
     return allocations
 
+# Confirm to the portal that a user is created
+def reportCreation(personId):
+
+    authParams['person'] = personId
+
+    # Encode  Credentials and other parameters for POSTing
+    params = urllib.urlencode(authParams)
+
+    # Use httplib to request the data
+    conn = httplib.HTTPSConnection(servername)
+    listAllocationsUrl = url + "/portal/api/accountCreated/"
+    conn.request("POST", listAllocationsUrl, params, headers)
+    response = conn.getresponse()
+    data = response.read()
+
+    return
+    
+
 # Check if an allocation is completely active on a system and activate/repair if not
 def activateAllocation(allocation):
     print ("Work work work. I'm activating \"%s\" for \"%s\" with %s core hours on %s." % (allocation['name'], allocation['project'], allocation['serviceunits'], allocation['service']))
@@ -397,6 +415,7 @@ def activateAccount(user, allocation, personId):
     if not (ldapExistanceCheck(user)):
         print ("User %s doesn't exist in ldap, attempting to create" % (user))
         createLdapUser(user, personId)
+        reportCreation(personId)
         userList.append(user)
         
     # Add user to Allocation in ldap if they aren't already
