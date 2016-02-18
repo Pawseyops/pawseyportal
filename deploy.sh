@@ -16,3 +16,4 @@ pip install commonware
 
 cd /var/www/pythonapps/pawseyportal/$VERSION
 python manage.py collectstatic --noinput
+python manage.py migrate
