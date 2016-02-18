@@ -6,6 +6,11 @@ import account_services
 import admin_widgets
 from ajax_select.admin import *
 
+class AllocationCommentsInline(admin.TabularInline):
+    model = Comment
+    exclude = ['project']
+    readonly_fields = ['user']
+    extra = 1
 
 class PersonProjectInline(admin_widgets.ImproveRawIdFieldsInline):
     model = Project.people.through
@@ -79,7 +84,16 @@ class AllocationAdmin(admin.ModelAdmin):
     list_filter = ['start','end']
     search_fields = ['^name', '^project__code']
 
-    inlines = [FilesystemInline]
+    inlines = [FilesystemInline, AllocationCommentsInline]
+
+    def save_formset(self, request, form, formset, change): 
+        if formset.model == Comment:
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.user = request.user
+                instance.save()
+        else:
+            formset.save()
 
 class PriorityAreaAdmin(admin.ModelAdmin):
     list_display = ('name', 'code')

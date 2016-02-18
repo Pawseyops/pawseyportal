@@ -22,3 +22,4 @@ class ProjectAdminForm(forms.ModelForm):
         fields = ['code', 'title', 'principalInvestigator', 'summary', 'people']
     people = make_ajax_field(Project, 'people', 'person', )
     principalInvestigator = make_ajax_field(Project, 'principalInvestigator', 'principalInvestigator', )
+
