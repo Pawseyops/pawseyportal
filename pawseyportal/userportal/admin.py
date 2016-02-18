@@ -9,6 +9,10 @@ from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
 
+class FORInline(admin.TabularInline):
+    model = ResearchClassification
+    extra = 3
+
 class ProjectCommentsInline(admin.TabularInline):
     model = Comment
     exclude = ['allocation','user']
@@ -93,7 +97,7 @@ class PersonAdmin(admin.ModelAdmin):
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
 class ProjectAdmin(AjaxSelectAdmin):
-    inlines = [AllocationInline, ProjectCommentsInline]
+    inlines = [FORInline, AllocationInline, ProjectCommentsInline]
 
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']

@@ -244,3 +244,14 @@ class Comment(models.Model):
     allocation = models.ForeignKey(Allocation, related_name = "allocation", null = True, blank = True)
     project = models.ForeignKey(Project, related_name = "project", null = True, blank = True)
     user = models.ForeignKey(User, related_name = "user", null = True, blank = True)
+
+    def __unicode(self):
+        return self.user
+
+class ResearchClassification(models.Model):
+    project = models.ForeignKey(Project)
+    code = models.IntegerField(null=True, blank=True)
+    percentage = models.IntegerField(null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s" % self.code
