@@ -5,12 +5,33 @@ from admin_forms import *
 import account_services
 import admin_widgets
 from ajax_select.admin import *
+from django.utils.safestring import mark_safe
+from django.utils.html import escape, conditional_escape
+from django.utils.encoding import force_unicode
 
+class ProjectCommentsInline(admin.TabularInline):
+    model = Comment
+    exclude = ['allocation','user']
+    readonly_fields = ['commenter_name']
+    extra = 1
+    
+    def commenter_name(self,instance):
+        if instance.user is None:
+            return mark_safe(u'<span></span>')
+        else:
+            return mark_safe(u'<span>%s %s</span>' % (conditional_escape(force_unicode(instance.user.first_name)), conditional_escape(force_unicode(instance.user.last_name))))
+            
 class AllocationCommentsInline(admin.TabularInline):
     model = Comment
-    exclude = ['project']
-    readonly_fields = ['user']
+    exclude = ['project', 'user']
+    readonly_fields = ['commenter_name']
     extra = 1
+
+    def commenter_name(self,instance):
+        if instance.user is None:
+            return mark_safe(u'<span></span>')
+        else:
+            return mark_safe(u'<span>%s %s</span>' % (conditional_escape(force_unicode(instance.user.first_name)), conditional_escape(force_unicode(instance.user.last_name))))
 
 class PersonProjectInline(admin_widgets.ImproveRawIdFieldsInline):
     model = Project.people.through
@@ -72,12 +93,21 @@ class PersonAdmin(admin.ModelAdmin):
     send_account_created_email.short_description = "Send account created notification email to selected People."
 
 class ProjectAdmin(AjaxSelectAdmin):
-    inlines = [AllocationInline]
+    inlines = [AllocationInline, ProjectCommentsInline]
 
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']
     form = ProjectAdminForm
     search_fields = ['^code', '^title']
+
+    def save_formset(self, request, form, formset, change): 
+        if formset.model == Comment:
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.user = request.user
+                instance.save()
+        else:
+            formset.save()
 
 class AllocationAdmin(admin.ModelAdmin):
     list_display = ('name', 'project', 'startQuarter', 'endQuarter', 'permanent')
@@ -91,7 +121,7 @@ class AllocationAdmin(admin.ModelAdmin):
             instances = formset.save(commit=False)
             for instance in instances:
                 instance.user = request.user
-                instance.save()
+            instance.save()
         else:
             formset.save()
 
