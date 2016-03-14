@@ -73,8 +73,15 @@ allocation_service = """Service which this allocation is for"""
 allocation_suspend = """Tick to suspend allocation"""
 allocation_allocation_round = """Allocation round that this allocation comes under"""
 
+# Partition Model
+partition_name = """Name of the partition (exactly as on system)"""
+
+# Allocation Partition Model
+allocationpartition_partition = """Partition that this applies to"""
+allocationpartition_allocation = """Allocation that this applies to"""
+
 # Filesystem Model
-filesystem_name = """Name of the filesystem"""
+filesystem_name = """Name of the filesystem (exactly as on system)"""
 filesystem_quotad = """Tick if this filesystem has a quota on it"""
 
 # Allocation Filesystem Model

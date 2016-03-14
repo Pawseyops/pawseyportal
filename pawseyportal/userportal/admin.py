@@ -49,6 +49,10 @@ class PersonProjectInline(admin_widgets.ImproveRawIdFieldsInline):
     institution.short_description = 'Institution'
     extra = 3
 
+class PartitionInline(admin.TabularInline):
+    model = AllocationPartition
+    extra = 1
+
 class FilesystemInline(admin.TabularInline):
     model = AllocationFilesystem
     extra = 2
@@ -118,7 +122,7 @@ class AllocationAdmin(admin.ModelAdmin):
     list_filter = ['start','end']
     search_fields = ['^name', '^project__code']
 
-    inlines = [FilesystemInline, AllocationCommentsInline]
+    inlines = [PartitionInline, FilesystemInline, AllocationCommentsInline]
 
     def save_formset(self, request, form, formset, change): 
         if formset.model == Comment:

@@ -205,6 +205,18 @@ class Allocation(models.Model):
 
     def __unicode__(self):
         return self.name
+class Partition(models.Model):
+    name = models.CharField(max_length=32, help_text = help_text.partition_name)
+
+    def __unicode(self):
+        return self.name
+
+class AllocationPartition(models.Model):
+    partition = models.ForeignKey(Partition, help_text = help_text.allocationpartition_partition)
+    allocation = models.ForeignKey(Allocation, help_text = help_text.allocationpartition_allocation)
+
+    def __unicode__(self):
+        return self.partition.name
 
 class Filesystem(models.Model):
     name = models.CharField(max_length=32, help_text = help_text.filesystem_name)
