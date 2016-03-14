@@ -205,10 +205,11 @@ class Allocation(models.Model):
 
     def __unicode__(self):
         return self.name
+
 class Partition(models.Model):
     name = models.CharField(max_length=32, help_text = help_text.partition_name)
 
-    def __unicode(self):
+    def __unicode__(self):
         return self.name
 
 class AllocationPartition(models.Model):
