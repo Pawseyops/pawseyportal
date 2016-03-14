@@ -125,7 +125,7 @@ class AllocationAdmin(admin.ModelAdmin):
             instances = formset.save(commit=False)
             for instance in instances:
                 instance.user = request.user
-            instance.save()
+                instance.save()
         else:
             formset.save()
 
