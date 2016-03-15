@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse, Http404, HttpResponseRedirect
+from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpResponse
 from models import *
 from forms import *
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 import account_services
 from helpers import api_ip_authorisation
+import yaml
 
 import datetime
 
@@ -203,3 +204,48 @@ def accountCreatedView(request):
         return JsonResponse(response_data)
     else:
         raise PermissionDenied
+
+# Api view. Generate YAML for current allocations.
+@csrf_exempt
+@api_ip_authorisation
+def yamlAllocationsView(request):
+    user = portalAuth(request)
+    if user.is_active and user.is_superuser:
+        response_data = {}
+        
+        for project in Project.objects.all():
+            proj_data = {}
+            proj_data['admin'] = ("%s %s <%s>" % (project.principalInvestigator.firstName, project.principalInvestigator.surname, project.principalInvestigator.institutionEmail))
+            proj_data['id'] = project.id
+            for allocation in Allocation.objects.filter(project_id=project.id).filter(start__lte=datetime.date.today()).filter(end__gte=datetime.date.today()).exclude(suspend='True'):
+                proj_data['priority'] = allocation.priorityArea.name
+                group = AllocationFilesystem.objects.filter(filesystem__name='group').filter(allocation_id=allocation.id)
+                if (group.exists()):
+                    proj_data['group'] = proj_data.setdefault('group',0) + group.first().quota
+                else:
+                    proj_data['group'] = proj_data.setdefault('group',1)
+
+                # The actual SU Allocation
+                proj_data.setdefault(allocation.service.name,{})
+                proj_data[allocation.service.name]['hours'] = proj_data[allocation.service.name].setdefault('hours', allocation.serviceunits)
+
+                # Extra partitions
+                for allocationPartition in AllocationPartition.objects.filter(allocation_id=allocation.id):
+                    try:
+                        parts
+                    except NameError:
+                        parts = []
+                    parts.append(str(allocationPartition.partition.name))
+                try:
+                    delim = ","
+                    proj_data['partition']=delim.join(parts)
+                    del parts
+                except NameError:
+                    pass
+
+            response_data[project.code] = proj_data
+
+        return HttpResponse(yaml.safe_dump(response_data, default_flow_style=False), content_type="text/plain")
+    else:
+            raise PermissionDenied
+

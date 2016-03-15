@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^api/listPeople/$', views.listPeopleView, name='list_people'),
     url(r'^api/userDetail/$', views.userDetailView, name='user_detail'),
     url(r'^api/accountCreated/$', views.accountCreatedView, name='account_created'),
+    url(r'^api/yamlAllocation/$', views.yamlAllocationsView, name='yaml_allocation'),
     url(r'^account-request/(?P<email_hash>[\w\d\-]+)[/]$', views.userDetailsRequest, name='account-request'),
     url(r'^account-thanks/$', views.userDetailsThanks, name='account-thanks'),
 ]
