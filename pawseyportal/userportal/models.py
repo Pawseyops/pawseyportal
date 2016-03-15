@@ -268,3 +268,6 @@ class ResearchClassification(models.Model):
 
     def __unicode__(self):
         return "%s" % self.code
+
+class YamlDefaults(modes.Model):
+    defaults = models.TextField(null = True, blank = True, help_text = help_text.yamldefaults_defaults)

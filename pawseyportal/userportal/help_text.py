@@ -91,3 +91,6 @@ allocationfilesystem_quota = "Quota of this allocation on this filesystem"""
 
 # Comment Model
 comment_comment = """Internal Comment about the Project or Allocation"""
+
+# Yaml File Defaults
+yamldefaults_defaults = """YAML File defaults in correct YAML format for activate account. The last one will be used."""
