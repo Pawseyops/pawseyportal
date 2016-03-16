@@ -106,7 +106,7 @@ class ProjectAdmin(AjaxSelectAdmin):
     list_display = ('code', 'title', 'principalInvestigator')
     filter_horizontal = ['people']
     form = ProjectAdminForm
-    search_fields = ['^code', '^title']
+    search_fields = ['^code', '^title', '^principalInvestigator__firstName', '^principalInvestigator__surname']
 
     def save_formset(self, request, form, formset, change): 
         if formset.model == Comment:

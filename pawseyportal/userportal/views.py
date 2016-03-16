@@ -213,11 +213,16 @@ def yamlAllocationsView(request):
     if user.is_active and user.is_superuser:
         response_data = {}
         
-        for project in Project.objects.all():
+        for project in Project.objects.exclude(code__isnull=True).exclude(code__exact=''):
             proj_data = {}
             proj_data['admin'] = ("%s %s <%s>" % (project.principalInvestigator.firstName, project.principalInvestigator.surname, project.principalInvestigator.institutionEmail))
             proj_data['id'] = project.id
-            for allocation in Allocation.objects.filter(project_id=project.id).filter(start__lte=datetime.date.today()).filter(end__gte=datetime.date.today()).exclude(suspend='True'):
+            allocs = Allocation.objects.filter(project_id=project.id).filter(start__lte=datetime.date.today()).filter(end__gte=datetime.date.today()).exclude(serviceunits__lt=1).exclude(suspend='True')
+
+            if not allocs.exists():
+                continue
+
+            for allocation in allocs:
                 proj_data['priority'] = allocation.priorityArea.name
                 group = AllocationFilesystem.objects.filter(filesystem__name='group').filter(allocation_id=allocation.id)
                 if (group.exists()):
@@ -245,7 +250,9 @@ def yamlAllocationsView(request):
 
             response_data[project.code] = proj_data
 
-        return HttpResponse(yaml.safe_dump(response_data, default_flow_style=False), content_type="text/plain")
+        yamlFile = ("%s\n%s" % (YamlDefaults.objects.latest('id').defaults, yaml.safe_dump(response_data, default_flow_style=False)))
+
+        return HttpResponse(yamlFile, content_type="text/plain")
     else:
             raise PermissionDenied
 
