@@ -231,8 +231,28 @@ def yamlAllocationsView(request):
                     proj_data['group'] = proj_data.setdefault('group',1)
 
                 # The actual SU Allocation
-                proj_data.setdefault(allocation.service.name,{})
-                proj_data[allocation.service.name]['hours'] = proj_data[allocation.service.name].setdefault('hours', allocation.serviceunits)
+                thisYear = date.today().year
+                if (allocation.start.year < thisYear):
+                    startQuarter = 1
+                else:
+                    startQuarter = ((allocation.start.month-1)//3 + 1)
+
+                if (allocation.end.year > thisYear):
+                    endQuarter = 4
+                else:
+                    endQuarter = ((allocation.end.month-1)//3 + 1)
+
+                for quarter in range(startQuarter, endQuarter + 1):
+                    quarterTitle = ("hours.%sq%s" % (thisYear, quarter))
+                    if (quarter < 3) and ( allocation.priorityArea_id == 2 ):  
+                        quarterServiceunits = int(allocation.serviceunits * 0.31 * 4 / allocation.quarterLength())
+                    else:
+                        quarterServiceunits = int(allocation.serviceunits / allocation.quarterLength())
+                    proj_data.setdefault(allocation.service.name,{})
+                    if quarterTitle in proj_data[allocation.service.name]:
+                        proj_data[allocation.service.name][quarterTitle] += quarterServiceunits
+                    else:
+                        proj_data[allocation.service.name][quarterTitle] = quarterServiceunits
 
                 # Extra partitions
                 for allocationPartition in AllocationPartition.objects.filter(allocation_id=allocation.id):
@@ -243,7 +263,7 @@ def yamlAllocationsView(request):
                     parts.append(str(allocationPartition.partition.name))
                 try:
                     delim = ","
-                    proj_data['partition']=delim.join(parts)
+                    proj_data[allocation.service.name]['partition']=delim.join(parts)
                     del parts
                 except NameError:
                     pass

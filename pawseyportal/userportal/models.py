@@ -191,6 +191,9 @@ class Allocation(models.Model):
     def endQuarter(self):
         return str(self.end.year) + 'Q' + str((self.end.month-1)//3 + 1)
 
+    def quarterLength(self):
+        return (self.end - self.start).days/91
+
     def startYear(self):
         return self.start.year
 
