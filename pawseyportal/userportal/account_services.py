@@ -60,7 +60,7 @@ def hash_password(newpassword, pwencoding='ssha'):
 def save_account_details(person):
     person_account = person.personAccount
     person.status_id = Person.STATUS['DETAILS_FILLED']
-    person.details_filled_on = datetime.datetime.now()
+    person.detailsFilledOn = datetime.datetime.now()
     #make sure the uid is valid
     person_account.save()
     person_account.constrain_uidgid() #'fixes' the uidnumber/gidnumber and saves

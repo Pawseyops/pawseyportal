@@ -61,7 +61,6 @@ class PersonAccount(models.Model):
         return newid
 
     def __unicode__(self):
-        #return self.uid   #TODO: relate this back to the Person to get name.
         try:
             personName = ("%s %s" % (self.person.last().firstName, self.person.last().surname))
         except:
@@ -97,6 +96,7 @@ class Person(models.Model):
     accountEmailHash = models.CharField(max_length=50, null=True, blank=True, verbose_name='Account Email Hash', help_text = help_text.person_accountemailhash)
     status = models.ForeignKey(PersonStatus, default=STATUS['NEW'], help_text = help_text.person_status)
     accountEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Creation Email On', help_text = help_text.person_accountemailon)
+    detailsFilledOn = models.DateTimeField(null=True, blank=True, verbose_name='Details Filled On', help_text = help_text.person_detailsfilledon)
     accountCreatedOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created On', help_text = help_text.person_accountcreatedon)
     accountCreatedEmailOn = models.DateTimeField(null=True, blank=True, verbose_name='Account Created Email On', help_text = help_text.person_accountcreatedemailon)
 
