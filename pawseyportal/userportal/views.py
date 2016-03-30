@@ -251,8 +251,11 @@ def yamlAllocationsView(request):
                 else:
                     for quarter in range(startQuarter, endQuarter + 1):
                         quarterTitle = ("hours.%sq%s" % (thisYear, quarter))
-                        if (quarter < 3) and ( allocation.priorityArea_id == 2 ):  
-                            quarterServiceunits = int(allocation.serviceunits * 0.31 * 4 / allocation.quarterLength())
+                        if ( allocation.priorityArea_id == 2 ):  
+                            if (quarter < 3):
+                                quarterServiceunits = int(allocation.serviceunits * 0.31 * 4 / allocation.quarterLength())
+                            else:
+                                quarterServiceunits = int(allocation.serviceunits * 0.19 * 4 / allocation.quarterLength())
                         else:
                             quarterServiceunits = int(allocation.serviceunits / allocation.quarterLength())
                         proj_data.setdefault(allocation.service.name,{})
