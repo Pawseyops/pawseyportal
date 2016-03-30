@@ -224,7 +224,7 @@ def yamlAllocationsView(request):
 
             for allocation in allocs:
                 proj_data['priority'] = allocation.priorityArea.code
-                group = AllocationFilesystem.objects.filter(filesystem__name='group').filter(allocation_id=allocation.id)
+                group = AllocationFilesystem.objects.filter(filesystem__name='/group').filter(allocation_id=allocation.id)
                 if (group.exists()):
                     proj_data['group'] = proj_data.setdefault('group',0) + group.first().quota
                 else:
