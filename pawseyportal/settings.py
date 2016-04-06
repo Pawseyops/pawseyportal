@@ -151,6 +151,7 @@ EMAIL_SUBJECT_PREFIX = '[PawseyPortal] '
 API_AUTHORISED_IPS = []
 # cookies expiration. 8 hours.
 SESSION_COOKIE_AGE = 8*60*60
+SESSION_COOKIE_PATH = "%s%s" % (MYURL,'/')
 
 # Try to find a custom settings file (rather than changing this one)
 
