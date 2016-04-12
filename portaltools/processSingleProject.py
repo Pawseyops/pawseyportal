@@ -180,7 +180,7 @@ def checkParentOu(institutionOu):
         exit(1)
 
 # Create Project in LDAP
-def createLdapProject(projectCode, projectId, priorityArea, service = ''):
+def createLdapProject(projectCode, projectId, priorityArea, service = '', title = 'Title'):
 
     gidNumber = str(33000 + projectId)
 
@@ -197,6 +197,7 @@ def createLdapProject(projectCode, projectId, priorityArea, service = ''):
     attrs['gidnumber'] = gidNumber
     attrs['memberUid'] = 'dummy'
     attrs['host'] = ("%s%s" % ( service.encode("utf8"), str(date.today().year)))
+    attrs['description'] = title
     
     # Make the attributes dictionary into something we can throw at an ldap server
     ldif = modlist.addModlist(attrs)
@@ -383,7 +384,7 @@ def activateAllocation(allocation):
     # Create Allocation in ldap if it's not already there
     if not (ldapProjectExistanceCheck(allocation['projectCode'], allocation['service'])):
         print ("Project %s doesn't exist in ldap, attempting to create" % (allocation['projectCode']))
-        createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'])
+        createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'], allocation['project'])
     
 
     return
@@ -424,6 +425,10 @@ def activateAccount(user, allocation, personId):
         reportCreation(personId)
         userList.append(user)
         
+    # MRBS Users are different
+    if (allocation['projectCode'] == "mrbsusers"):
+        return
+
     # Add user to Allocation in ldap if they aren't already
     if not (ldapAllocationCheck(user,allocation)):
         print ("User %s isn't attached to allocation \"%s\", so attaching them" % (user,allocation['name']))

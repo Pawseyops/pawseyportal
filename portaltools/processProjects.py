@@ -31,8 +31,14 @@ def initLDAP():
 def ldapAllocationCheck(user, allocation):
     # Get an appropriate LDAP Object
     pawseyLdap = initLDAP()
+    print allocation['projectCode']
     searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
-    results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
+    try:
+        results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
+    except ldap.LDAPError, e:
+	searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], "iVEC Partners", ldapBaseDN))
+	results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
+
     for result in results:
         result_attrs = result[1]
         if user in result_attrs['memberUid']:
@@ -174,7 +180,7 @@ def checkParentOu(institutionOu):
         exit(1)
 
 # Create Project in LDAP
-def createLdapProject(projectCode, projectId, priorityArea, service = ''):
+def createLdapProject(projectCode, projectId, priorityArea, service = '', title = 'Title'):
 
     gidNumber = str(33000 + projectId)
 
@@ -191,6 +197,7 @@ def createLdapProject(projectCode, projectId, priorityArea, service = ''):
     attrs['gidnumber'] = gidNumber
     attrs['memberUid'] = 'dummy'
     attrs['host'] = ("%s%s" % ( service.encode("utf8"), str(date.today().year)))
+    attrs['description'] = title
     
     # Make the attributes dictionary into something we can throw at an ldap server
     ldif = modlist.addModlist(attrs)
@@ -377,7 +384,7 @@ def activateAllocation(allocation):
     # Create Allocation in ldap if it's not already there
     if not (ldapProjectExistanceCheck(allocation['projectCode'], allocation['service'])):
         print ("Project %s doesn't exist in ldap, attempting to create" % (allocation['projectCode']))
-        createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'])
+        createLdapProject(allocation['projectCode'], allocation['projectId'], allocation['priorityArea'], allocation['service'], allocation['project'])
     
 
     return
@@ -417,6 +424,10 @@ def activateAccount(user, allocation, personId):
         createLdapUser(user, personId)
         reportCreation(personId)
         userList.append(user)
+
+    # MRBS Users are different
+    if (allocation['projectCode'] == "mrbsusers"):
+        return
         
     # Add user to Allocation in ldap if they aren't already
     if not (ldapAllocationCheck(user,allocation)):
@@ -462,7 +473,7 @@ authParams = {'username': username, 'password': password}
 
 # Get options
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hs:", ["help", "system="])
+    opts, args = getopt.getopt(sys.argv[1:], "hsp:", ["help", "system=", "project="])
 except getopt.GetoptError as err:
     # print help information and exit:
     print(err) # will print something like "option -a not recognized"
@@ -490,7 +501,7 @@ if allocations == None:
 
 # Cycle through allocations
 for allocation in allocations:
-    
+
     if (allocations[allocation]['projectCode'] == ''):
         print "Project does not have a project code yet, skipping"
         continue
