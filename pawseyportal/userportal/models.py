@@ -62,7 +62,7 @@ class PersonAccount(models.Model):
 
     def __unicode__(self):
         try:
-            personName = ("%s %s" % (self.person.last().firstName, self.person.last().surname))
+            personName = ("%s %s (%s)" % (self.person.last().firstName, self.person.last().surname, self.uid))
         except:
             personName = "No person attached"
         return personName
