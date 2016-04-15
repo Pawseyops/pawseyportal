@@ -21,6 +21,7 @@ class PersonAccountForm(forms.Form):
             if self.cleaned_data['password1'] != self.cleaned_data['password2']:
                 raise forms.ValidationError("The two password fields didn't match.")
         if 'uid' in self.cleaned_data:
+            self.cleaned_data['uid'] = self.cleaned_data['uid'].lower()
             if not account_services.check_unique_uid(self.cleaned_data['uid'], ):
                 raise forms.ValidationError("The uid you requested is already taken")
         return self.cleaned_data 

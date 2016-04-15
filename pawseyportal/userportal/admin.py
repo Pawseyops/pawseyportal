@@ -72,9 +72,10 @@ class PersonAdmin(admin.ModelAdmin):
     list_display = ('displayName', 'institution', 'preferredEmail', 'status') 
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
-    exclude = ['personAccount', 'accountEmailHash' ]
+    exclude = ['accountEmailHash' ]
     readonly_fields = ['status', 'accountEmailOn', 'detailsFilledOn', 'accountCreatedOn', 'accountCreatedEmailOn']
     search_fields = ['^firstName', '^surname'] 
+    raw_id_fields = ('personAccount')
 
     def send_account_request_email(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
@@ -99,6 +100,9 @@ class PersonAdmin(admin.ModelAdmin):
         self.message_user(request, message)
 
     send_account_created_email.short_description = "Send account created notification email to selected People."
+
+class PersonAccountAdmin(admin.ModelAdmin):
+    search_fields = ['^uid']
 
 class ProjectAdmin(AjaxSelectAdmin):
     inlines = [FORInline, AllocationInline, ProjectCommentsInline]
@@ -158,7 +162,7 @@ admin.site.register(Service, ServiceAdmin)
 admin.site.register(ServiceType, ServiceTypeAdmin)
 admin.site.register(Filesystem)
 admin.site.register(Partition)
-admin.site.register(PersonAccount)
+admin.site.register(PersonAccount, PersonAccountAdmin)
 admin.site.register(AllocationRound, AllocationRoundAdmin)
 admin.site.register(EmailTemplate,EmailTemplateAdmin)
 admin.site.register(YamlDefaults)
