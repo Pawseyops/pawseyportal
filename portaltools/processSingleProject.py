@@ -197,7 +197,7 @@ def createLdapProject(projectCode, projectId, priorityArea, service = '', title 
     attrs['gidnumber'] = gidNumber
     attrs['memberUid'] = 'dummy'
     attrs['host'] = ("%s%s" % ( service.encode("utf8"), str(date.today().year)))
-    attrs['description'] = title
+    attrs['description'] = str(title)
     
     # Make the attributes dictionary into something we can throw at an ldap server
     ldif = modlist.addModlist(attrs)
