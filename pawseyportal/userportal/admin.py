@@ -8,6 +8,7 @@ from ajax_select.admin import *
 from django.utils.safestring import mark_safe
 from django.utils.html import escape, conditional_escape
 from django.utils.encoding import force_unicode
+from django.core import urlresolvers
 
 class FORInline(admin.TabularInline):
     model = ResearchClassification
@@ -73,10 +74,20 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
     exclude = ['accountEmailHash' ]
-    readonly_fields = ['status', 'accountEmailOn', 'detailsFilledOn', 'accountCreatedOn', 'accountCreatedEmailOn']
+    readonly_fields = ['projects_list','status', 'accountEmailOn', 'detailsFilledOn', 'accountCreatedOn', 'accountCreatedEmailOn']
     search_fields = ['^firstName', '^surname'] 
     raw_id_fields = ('personAccount')
 
+    # List the projects that the user belongs to for convenience
+    def projects_list(self, instance):
+        projectsOutput = []
+        projects = instance.projectList()
+        for project in projects:
+            projectUrl = urlresolvers.reverse('admin:userportal_project_change', args=(project.id,))
+            projectsOutput.append('<a href="%s">%s</a>' % (projectUrl, project.code))
+        return mark_safe("</br>".join(projectsOutput))
+
+    # Send out the account details request link to user
     def send_account_request_email(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
 
@@ -89,6 +100,7 @@ class PersonAdmin(admin.ModelAdmin):
 
     send_account_request_email.short_description = "Send account request details email to selected People."
 
+    # Send account created notification or welcome email to user
     def send_account_created_email(self, request, queryset):
         selected = request.POST.getlist(admin.ACTION_CHECKBOX_NAME)
 
