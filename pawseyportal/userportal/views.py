@@ -215,7 +215,7 @@ def yamlAllocationsView(request):
         
         for project in Project.objects.exclude(code__isnull=True).exclude(code__exact=''):
             proj_data = {}
-            proj_data['admin'] = ("%s %s <%s>" % (project.principalInvestigator.firstName, project.principalInvestigator.surname, project.principalInvestigator.institutionEmail))
+            proj_data['admin'] = ("\"%s %s <%s>\"" % (project.principalInvestigator.firstName, project.principalInvestigator.surname, project.principalInvestigator.institutionEmail))
             proj_data['id'] = project.id
             allocs = Allocation.objects.filter(project_id=project.id).filter(start__lte=datetime.date.today()).filter(end__gte=datetime.date.today()).exclude(serviceunits__lt=1).exclude(suspend='True')
 
