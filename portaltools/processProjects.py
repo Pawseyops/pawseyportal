@@ -433,6 +433,7 @@ def activateAccount(user, allocation, personId):
     if not (ldapAllocationCheck(user,allocation)):
         print ("User %s isn't attached to allocation \"%s\", so attaching them" % (user,allocation['name']))
         attachLdapUser(user, allocation)
+        userProjectList.append(user)
 
     # Check User has a home directory on the appropriate system and create if not. Also create /group and /scratch directory (manual workaround for /scratch2 for now)
     #checkUserDirectories(user, allocation)
@@ -491,6 +492,7 @@ for opt, arg in opts:
 
 projectList = []
 userList = []
+userProjectList = []
 
 # Get the current allocations for this system
 allocations = getAllocations(system, authParams)
@@ -528,3 +530,5 @@ print ("List of Projects Activated")
 print ("\n".join(projectList))
 print ("List of Users Activated")
 print ("\n".join(userList))
+print ("List of Users Added to Projects")
+print ("\n".join(userProjectList))
