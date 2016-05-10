@@ -32,10 +32,12 @@ def ldapAllocationCheck(user, allocation):
     # Get an appropriate LDAP Object
     pawseyLdap = initLDAP()
     print allocation['projectCode']
-    searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
+    #searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
+    searchFilter = ("cn=%s" % (allocation['projectCode']))
     try:
-        results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
+        results = pawseyLdap.search_s(ldapBaseDN, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
     except ldap.LDAPError, e:
+	print e
 	searchFilter = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], "iVEC Partners", ldapBaseDN))
 	results = pawseyLdap.search_s(searchFilter, ldap.SCOPE_BASE)
 
@@ -291,15 +293,27 @@ def attachLdapUser(user, allocation):
     pawseyLdap = initLDAP()
 
     mod_attrs = [( ldap.MOD_ADD, 'memberUid', user.encode('utf8') )]
-
-    dn = ("cn=%s,ou=%s,ou=Projects,ou=Groups,%s" % (allocation['projectCode'], allocation['priorityArea'], ldapBaseDN))
-
-    try: 
-        print "Adding user to project in ldap"
-        pawseyLdap.modify_s(dn, mod_attrs)
-    except ldap.LDAPError,e:
-        print e
-        exit(1)
+    # Find the DN. It might be in an unexpected place if allocations overlap priority areas.
+    searchFilter = ("cn=%s" % (allocation['projectCode']))
+    try:
+        results = pawseyLdap.search_s(ldapBaseDN, ldapSearchScope, searchFilter, ldapRetrieveAttributes)
+    except ldap.LDAPError, e:
+	print e
+	exit(1)
+    # There should be only 1, print a Warning only if there are more than one and loop through them all adding users.
+    pcheck = 0
+    for result in results:
+	if pcheck > 0:
+	    print ("Warning, %s exists in more than one place" % (allocation['projectCode']))
+	else:
+	    pcheck =+ pcheck
+	dn = result[0]
+    	try: 
+        	print "Adding user to project in ldap"
+        	pawseyLdap.modify_s(dn, mod_attrs)
+        except ldap.LDAPError,e:
+            print e
+            exit(1)
     return 
 
 # Obtain list of Allocations
