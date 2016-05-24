@@ -40,7 +40,7 @@ person_personaccount = """The account information for the person"""
 person_accountemailhash = """The uuid used to identify the account in the email sent out for requesting details"""
 person_status = """The status of the person"""
 person_accountemailon = """The date that the email was sent out to request details for account creation"""
-person_detailsfilledon = """The data that the person filled their details on for account creation"""
+person_detailsfilledon = """The date that the person filled their details on for account creation"""
 person_accountcreatedon = """The date that the account was created"""
 person_accountcreatedemailon = """The date the person was emailed to tell them their account was ready"""
 

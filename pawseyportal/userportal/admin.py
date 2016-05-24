@@ -70,7 +70,7 @@ class InstitutionAdmin(admin.ModelAdmin):
     search_fields = ['^name']
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ('displayName', 'institution', 'preferredEmail', 'status') 
+    list_display = ('displayName', 'institution', 'institutionEmail', 'status') 
     list_filter = ['status']
     actions = ['send_account_request_email', 'send_account_created_email' ]
     exclude = ['accountEmailHash' ]
