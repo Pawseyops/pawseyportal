@@ -131,6 +131,7 @@ class Project(models.Model):
     code = models.CharField(max_length=32, null=True, blank=True, help_text = help_text.project_code)
     title = models.CharField(max_length=1024, help_text = help_text.project_title)
     principalInvestigator = models.ForeignKey(Person, related_name='pi', verbose_name='Principal Investigator', help_text = help_text.project_pi)
+    altAdmins = models.ManyToManyField(Person, verbose_name = 'Alternative Administrators', related_name='admin_people', help_text = help_text.project_altAdmins)
     summary = models.TextField(null=True, blank=True, help_text = help_text.project_summary)
     people = models.ManyToManyField(Person, help_text = help_text.project_people)
 

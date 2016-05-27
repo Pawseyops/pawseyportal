@@ -76,7 +76,7 @@ class PersonAdmin(admin.ModelAdmin):
     exclude = ['accountEmailHash' ]
     readonly_fields = ['projects_list','status', 'accountEmailOn', 'detailsFilledOn', 'accountCreatedOn', 'accountCreatedEmailOn']
     search_fields = ['^firstName', '^surname'] 
-    raw_id_fields = ('personAccount')
+    raw_id_fields = ['personAccount']
 
     # List the projects that the user belongs to for convenience
     def projects_list(self, instance):

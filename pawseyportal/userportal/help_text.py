@@ -48,6 +48,7 @@ person_accountcreatedemailon = """The date the person was emailed to tell them t
 project_code = """Project code of the project for use on systems"""
 project_title = """Title of the project"""
 project_pi = """Principal Investigator of the project"""
+project_altAdmins = """Alternative Administrators for the project that can request changes"""
 project_summary = """Summary of the project as provided in the proposal"""
 project_people = """The people taking part in the project"""
 
