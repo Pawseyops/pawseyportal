@@ -19,8 +19,8 @@ class ProjectAdminForm(forms.ModelForm):
         self.fields['people'].queryset = Person.objects.distinct('institutionEmail')
     class Meta:
         model = Project
-        fields = ['code', 'title', 'principalInvestigator', 'altInv', 'summary', 'people']
-    altInv = make_ajax_field(Project, 'altAdmins', 'person', )
+        fields = ['code', 'title', 'principalInvestigator', 'altAdmins', 'summary', 'people']
+    altAdmins = make_ajax_field(Project, 'altAdmins', 'person', )
     people = make_ajax_field(Project, 'people', 'person', )
     principalInvestigator = make_ajax_field(Project, 'principalInvestigator', 'principalInvestigator', )
 
