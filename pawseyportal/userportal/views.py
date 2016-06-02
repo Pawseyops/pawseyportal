@@ -3,6 +3,7 @@ from django.http import JsonResponse, Http404, HttpResponseRedirect, HttpRespons
 from models import *
 from forms import *
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
@@ -20,6 +21,28 @@ from django.views.decorators.csrf import csrf_exempt
 # Index, Currently a placeholder
 def indexView(request):
     raise Http404("No view requested")
+
+# Allow the creation of new users without using the Django Admin interface.
+@login_required
+@staff_member_required
+def personCreationView(request):
+    if request.method == 'POST':
+        form = PersonForm(request.POST)
+        if form.is_valid():
+            person = Person()
+            person.firstName = form.cleaned_data.get('firstName')
+            person.surname = form.cleaned_data.get('lastName')
+            person.institutionEmail = form.cleaned_data.get('institutionEmail')
+            person.student = form.cleaned_data.get('student')
+            person.institution = Institution.objects.get(name='None Selected')
+            person.save()
+            return HttpResponseRedirect(settings.MYURL + '/portal/index/')
+    else:
+        form = PersonForm()
+
+    return render (request, 'userportal/add_person.html', {
+        'form': form})
+
 
 # Get user details for user creation
 def userDetailsRequest(request, email_hash):

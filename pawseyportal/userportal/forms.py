@@ -1,6 +1,7 @@
 from django import forms
 from pawseyportal.userportal.models import *
 import account_services
+import pawseyportal.userportal.help_text as help_text
 
 class PersonAccountForm(forms.Form):
     firstName = forms.CharField(max_length=256 )
@@ -25,3 +26,9 @@ class PersonAccountForm(forms.Form):
             if not account_services.check_unique_uid(self.cleaned_data['uid'], ):
                 raise forms.ValidationError("The uid you requested is already taken")
         return self.cleaned_data 
+ 
+class PersonForm(forms.Form):
+    firstName = forms.CharField(max_length=256, help_text = help_text.person_firstname)
+    lastName = forms.CharField(max_length=256, help_text = help_text.person_surname)
+    institutionEmail = forms.EmailField(help_text = help_text.person_institution_email)
+    student = forms.BooleanField(required=False, help_text = help_text.person_student)

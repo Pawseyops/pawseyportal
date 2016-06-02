@@ -1,0 +1,24 @@
+{% extends "userportal/base.html" %}
+
+{% block title %}Person Creation for Resources on Pawsey Supercomputing Centre Infrastructure{% endblock %}
+
+{% block content %}
+<div style="margin: 1em;">
+<p>
+Please complete the initial details for creating a new account. 
+</p>
+
+<p>
+Should you have any problem completing this form please contact <a href="mailto:help@pawsey.org.au">help@pawsey.org.au</a>
+</p>
+</div>
+
+<form action="." method="POST" style="float: none;">{% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+<p class="submit-row">
+        <input type="submit" value="Submit" />
+    </p>
+</form>
+{% endblock %}

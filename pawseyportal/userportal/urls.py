@@ -13,4 +13,5 @@ urlpatterns = [
     url(r'^api/yamlAllocation/$', views.yamlAllocationsView, name='yaml_allocation'),
     url(r'^account-request/(?P<email_hash>[\w\d\-]+)[/]$', views.userDetailsRequest, name='account-request'),
     url(r'^account-thanks/$', views.userDetailsThanks, name='account-thanks'),
+    url(r'^person-create/$', views.personCreationView, name='person-create'),
 ]
