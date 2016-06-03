@@ -36,7 +36,7 @@ def personCreationView(request):
             person.student = form.cleaned_data.get('student')
             person.institution = Institution.objects.get(name='None Selected')
             person.save()
-            return HttpResponseRedirect(settings.MYURL + '/portal/index/')
+            return HttpResponseRedirect(settings.MYURL + '/portal/')
     else:
         form = PersonForm()
 

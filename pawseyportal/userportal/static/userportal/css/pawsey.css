@@ -5914,3 +5914,8 @@ td.visible-print {
         display: none!important
     }
 }
+
+form p.helptext {
+    font-size: 11px;
+    color: #999;
+}
