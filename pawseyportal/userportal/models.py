@@ -31,7 +31,6 @@ class PersonAccount(models.Model):
     uid = models.CharField(max_length=256, null=True, blank=True, help_text = help_text.personaccount_uid)
     uidNumber = models.IntegerField(null=True, blank=True, help_text = help_text.personaccount_uidnumber)
     gidNumber = models.IntegerField(null=True, blank=True, help_text = help_text.personaccount_gidnumber)
-    passwordHash = models.CharField(('password'), max_length=256, null=True, blank=True, help_text = help_text.personaccount_passwordhash)
 
     def constrain_uidgid(self):
         '''Ensures the users uidnumber and gidnumber are over 20k, and unique in the database.

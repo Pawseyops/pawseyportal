@@ -65,7 +65,6 @@ def userDetailsRequest(request, email_hash):
             person.institution_id = form.cleaned_data.get('institution').id
             person.mobilePhone = form.cleaned_data.get('mobilePhone')
             person.phone = form.cleaned_data.get('phone')
-            person_account.passwordHash = account_services.hash_password(form.cleaned_data.get('password1'))
             person_account.uid = form.cleaned_data.get('uid')
 
             account_services.save_account_details(person)
@@ -196,7 +195,6 @@ def userDetailView(request):
         response_data['gidNumber'] = person.personAccount.gidNumber
         response_data['mail'] = person.institutionEmail
         response_data['mailAlternateAddress'] = person.preferredEmail
-        response_data['userPassword'] = person.personAccount.passwordHash
         response_data['telephoneNumber'] = person.phone
         response_data['mobile'] = person.mobilePhone
         response_data['institution'] = person.institution.name

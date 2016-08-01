@@ -21,7 +21,6 @@ institution_partner = """Tick if the institution is a partner organisation"""
 personaccount_uid = """The user id of the account"""
 personaccount_uidnumber = """The uid number of the account"""
 personaccount_gidnumber = """The gid number of the account"""
-personaccount_passwordhash = """The hashed initial password of the account (not the current password in most cases, should have been changed)"""
 
 # Person Status Model
 personstatus_name = """The name of the status that can be assigned to a person"""

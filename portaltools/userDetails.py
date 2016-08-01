@@ -50,10 +50,9 @@ url = config.get('portal','url')
 
 params = {'username': username, 'password': password}
 
-user = userDetails(params,3)
+user = userDetails(params, 6583)
 
 print ("User Name: %s %s" % (user['givenName'],user['sn']))
-print ("Password Hash: %s" % (user['userPassword']))
 print ("Phone Number: %s" % (user['telephoneNumber']))
 print ("Email Address: %s" % (user['mail']))
 print ("Uid: %s" % (user['uid']))

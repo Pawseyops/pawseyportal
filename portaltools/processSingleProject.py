@@ -1,4 +1,6 @@
 #!/bin/python
+import random
+import string
 import httplib
 import urllib
 import json
@@ -216,15 +218,23 @@ def createLdapProject(projectCode, projectId, priorityArea, service = '', title 
     return 0
 
 
+# Generates random password (that the user will be required to change
+# prior to accessing the Pawsey systems)
+def generatePassword(n=20):
+    return ''.join(random.SystemRandom().choice(
+        string.ascii_uppercase
+            + string.ascii_lowercase
+            + string.digits) for _ in range(n))
+
 # Create user in LDAP
 def createLdapUser(user, personId):
     # Need to get user details and then pump them into ldap to create a user and a group
     userDict = userDetails(personId)
 
-    # Required details: Given Name, sn, Username, uidnumber, gidnumber (use username for gid), password hash, email address, phone number
-    if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "userPassword", "telephoneNumber", "institution")):
+    # Required details: Given Name, sn, Username, uidnumber, gidnumber (use username for gid), email address, phone number
+    if all (k in userDict for k in ("givenName", "sn", "uid", "uidNumber", "gidNumber", "mail", "telephoneNumber", "institution")):
         # Process them
-        if (userDict['uid'] == '' or userDict['uidNumber'] == '' or userDict['userPassword'] == '') :
+        if (userDict['uid'] == '' or userDict['uidNumber'] == '') :
             print "User has not filled in all their details, not creating account"
             return
 
@@ -248,10 +258,9 @@ def createLdapUser(user, personId):
         attrs['mail'] = str(userDict['mail']).encode("utf8")
         attrs['mailAlternateAddress'] = str(userDict.get('mailAlternateAddress',' ')).encode("utf8")
         attrs['homeDirectory'] = ("/home/%s" % (userDict['uid'])).encode("utf8")
-        attrs['userPassword'] = userDict['userPassword'].encode("utf8")
+        attrs['userPassword'] = generatePassword().encode("utf8")
         attrs['telephoneNumber'] = str(userDict.get('telephoneNumber', ' ')).encode("utf8")
         attrs['mobile'] = str(userDict.get('mobile',' ')).encode("utf8")
-
 
         # Make the attributes dictionary into something we can throw at an ldap server
         ldif = modlist.addModlist(attrs)
@@ -463,6 +472,7 @@ def activateAccount(user, allocation, personId):
 # Usage
 def usage():
     print "Usage Instructions"
+    # TODO: ??? :)
     exit(0)
 
 # Configuration
