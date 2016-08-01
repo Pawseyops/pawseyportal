@@ -28,7 +28,8 @@ class PersonAccountForm(forms.Form):
         return self.cleaned_data 
  
 class PersonForm(forms.Form):
-    firstName = forms.CharField(max_length=256, help_text = help_text.person_firstname)
-    lastName = forms.CharField(max_length=256, help_text = help_text.person_surname)
-    institutionEmail = forms.EmailField(help_text = help_text.person_institution_email)
+    firstName = forms.CharField(max_length=256, label='First Name', help_text = help_text.person_firstname)
+    lastName = forms.CharField(max_length=256, label='Last Name', help_text = help_text.person_surname)
+    institutionEmail = forms.EmailField(label='Institution Email', help_text = help_text.person_institution_email)
+    institution = forms.ModelChoiceField(queryset=Institution.objects.all(), help_text = help_text.person_institution)
     student = forms.BooleanField(required=False, help_text = help_text.person_student)
