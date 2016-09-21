@@ -103,7 +103,7 @@ class Person(models.Model):
         instance = getattr(self, 'instance', None)
         if not self.pk:
             personAccount = PersonAccount()
-            persons = Person.objects.filter(institutionEmail=self.institutionEmail)
+            persons = Person.objects.filter(institutionEmail__iexact=self.institutionEmail)
             if len(persons) > 0:
                 # Existing persons with this email address
                 # Attempt to re-use existing personAccount records before
